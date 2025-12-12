@@ -1,0 +1,29 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+<style>
+    .hidden {
+        display: none;
+    }
+</style>
+<section id="cover">
+    <div class="container">
+        <div class="quote-header">
+            <h2>Your Comparison Results</h2>
+        </div>
+        <div id="loader" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading quotes...</p>
+        </div>
+        <div id="quoteResponse"></div>
+    </div>
+</section>
+<script>
+    const csrfToken = "{{ csrf_token }}";
+    const currencySymbols = {{ currency_symbols | tojson }};
+</script>
+
+<script src="/assets/click2ship_core/js/quotes.js"></script>
+{% endblock %}

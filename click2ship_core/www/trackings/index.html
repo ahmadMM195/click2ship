@@ -1,0 +1,86 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+<section id="cover">
+    <div class="container">
+        <div class="quote-header"><h2>My Trackings</h2></div>
+    </div>
+    <div class="container">
+        <div class="row">
+            
+            {% include "click2ship_core/templates/includes/dashboard_left_nav.html" %}
+
+            <div class="col-md-9">
+                <div class="tracking-form">
+                    <h3>Track Your Shipment</h3>
+                    <div class="form-group">
+                        <input type="text" id="tracking-number" class="form-control" placeholder="Enter your tracking number">
+                    </div>
+                    <button id="track-btn" class="btn btn-primary">Track</button>
+                    <div id="tracking-results" class="mt-4"></div>
+                </div>
+
+                <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const trackBtn = document.getElementById("track-btn");
+                    const trackingNumberInput = document.getElementById("tracking-number");
+                    const trackingResults = document.getElementById("tracking-results");
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                    trackBtn.addEventListener("click", function () {
+                        const trackingNumber = trackingNumberInput.value.trim();
+                        if (!trackingNumber) {
+                            alert("Please enter a tracking number.");
+                            return;
+                        }
+
+                        trackingResults.innerHTML = "Loading...";
+
+                        fetch("/api/method/click2ship_core.api.call.tracking", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-Frappe-CSRF-Token": csrfToken
+                            },
+                            body: JSON.stringify({
+                                tracking_number: trackingNumber,
+                                carrier_name: "UPS" 
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(r => {
+                            if (r.message) {
+                                const data = r.message;
+                                if (data.tracking_status) {
+                                    let html = `<h4>Tracking Status: ${data.tracking_status}</h4>`;
+                                    if (data.events && data.events.length > 0) {
+                                        html += '<ul class="list-group">';
+                                        data.events.forEach(event => {
+                                            html += `<li class="list-group-item">
+                                                <strong>${event.date} at ${event.time}</strong><br>
+                                                ${event.description}<br>
+                                                <em>${event.location}</em>
+                                            </li>`;
+                                        });
+                                        html += '</ul>';
+                                    }
+                                    trackingResults.innerHTML = html;
+                                } else {
+                                    trackingResults.innerHTML = `<div class="alert alert-danger">${data.error || "Could not retrieve tracking information."}</div>`;
+                                }
+                            } else {
+                                trackingResults.innerHTML = '<div class="alert alert-danger">An error occurred.</div>';
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Error tracking shipment:", err);
+                            trackingResults.innerHTML = '<div class="alert alert-danger">An error occurred.</div>';
+                        });
+                    });
+                });
+                </script>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,395 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-09-30 02:50:57.674979",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "section_break_cvzg",
+  "shipment_barcode",
+  "booking_type",
+  "user",
+  "column_break_gmwf",
+  "shipment_booked_with",
+  "shipping_service_name",
+  "shipping_service_code",
+  "section_break_edqe",
+  "shipper",
+  "shipper_name",
+  "shipper_company",
+  "country_code",
+  "shipper_address1",
+  "shipper_address2",
+  "shipper_address3",
+  "shipper_city",
+  "shipper_state",
+  "shipper_postal_code",
+  "shipper_phone_number",
+  "shipper_email",
+  "shipper_fax",
+  "column_break_twgs",
+  "receiver",
+  "receiver_name",
+  "receiver_company",
+  "receiver_country",
+  "receiver_address1",
+  "receiver_address2",
+  "receiver_address3",
+  "receiver_city",
+  "receiver_state",
+  "receiver_postal_code",
+  "receiver_phone_number",
+  "receiver_email",
+  "receiver_fax",
+  "items_being_shipped_section",
+  "items",
+  "financial_details_section",
+  "base_cost",
+  "fuel_cost",
+  "insurance_cost",
+  "column_break_fgof",
+  "air_freight_cost",
+  "local_processing_cost",
+  "local_custom_charges",
+  "transhipping_clearance",
+  "section_break_qpwi",
+  "column_break_hlkq",
+  "total_cost_without_additional_cost",
+  "column_break_jhjd",
+  "total_extra_cost",
+  "section_break_djsi",
+  "column_break_awms",
+  "column_break_lane",
+  "grand_total_including_additional_cost"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series"
+  },
+  {
+   "fieldname": "section_break_cvzg",
+   "fieldtype": "Section Break",
+   "label": "Booking Details"
+  },
+  {
+   "fieldname": "shipment_barcode",
+   "fieldtype": "Data",
+   "label": "Shipment Barcode"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_edqe",
+   "fieldtype": "Section Break",
+   "label": "Shipper & Receiver Address"
+  },
+  {
+   "fieldname": "shipper",
+   "fieldtype": "Heading",
+   "label": "Shipper"
+  },
+  {
+   "fieldname": "shipper_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "shipper_company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "country_code",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "shipper_address1",
+   "fieldtype": "Data",
+   "label": "Address 1"
+  },
+  {
+   "fieldname": "shipper_address2",
+   "fieldtype": "Data",
+   "label": "Address 2"
+  },
+  {
+   "fieldname": "shipper_address3",
+   "fieldtype": "Data",
+   "label": "Address 3"
+  },
+  {
+   "fieldname": "shipper_city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "shipper_state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "fieldname": "shipper_postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code"
+  },
+  {
+   "fieldname": "shipper_phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "shipper_email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "shipper_fax",
+   "fieldtype": "Data",
+   "label": "Fax"
+  },
+  {
+   "fieldname": "column_break_twgs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "receiver",
+   "fieldtype": "Heading",
+   "label": "Receiver"
+  },
+  {
+   "fieldname": "receiver_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "receiver_company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "receiver_country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "receiver_address1",
+   "fieldtype": "Data",
+   "label": "Address 1"
+  },
+  {
+   "fieldname": "receiver_address2",
+   "fieldtype": "Data",
+   "label": "Address 2"
+  },
+  {
+   "fieldname": "receiver_address3",
+   "fieldtype": "Data",
+   "label": "Address 3"
+  },
+  {
+   "fieldname": "receiver_city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "receiver_state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "fieldname": "receiver_postal_code",
+   "fieldtype": "Data",
+   "label": "Postal Code"
+  },
+  {
+   "fieldname": "receiver_phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "receiver_email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "receiver_fax",
+   "fieldtype": "Data",
+   "label": "Fax"
+  },
+  {
+   "fieldname": "items_being_shipped_section",
+   "fieldtype": "Section Break",
+   "label": "Items Being Shipped"
+  },
+  {
+   "fieldname": "column_break_gmwf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipment_booked_with",
+   "fieldtype": "Data",
+   "label": "Shipment Booked With"
+  },
+  {
+   "fieldname": "booking_type",
+   "fieldtype": "Data",
+   "label": "Booking Type"
+  },
+  {
+   "fieldname": "shipping_service_name",
+   "fieldtype": "Data",
+   "label": "Shipping Service Name"
+  },
+  {
+   "fieldname": "shipping_service_code",
+   "fieldtype": "Data",
+   "label": "Shipping Service Code"
+  },
+  {
+   "fieldname": "financial_details_section",
+   "fieldtype": "Section Break",
+   "label": "Financial Details"
+  },
+  {
+   "fieldname": "base_cost",
+   "fieldtype": "Data",
+   "label": "Base Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_cost_without_additional_cost",
+   "fieldtype": "Data",
+   "label": "Total Cost (Without Additional Cost)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total_including_additional_cost",
+   "fieldtype": "Data",
+   "label": "Grand Total (Including Additional Cost)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fgof",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "air_freight_cost",
+   "fieldtype": "Data",
+   "label": "Air Freight Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "local_processing_cost",
+   "fieldtype": "Data",
+   "label": "Local Processing Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "local_custom_charges",
+   "fieldtype": "Data",
+   "label": "Local Custom Charges",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transhipping_clearance",
+   "fieldtype": "Data",
+   "label": "Transhipping Clearance",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Shipped Items"
+  },
+  {
+   "fieldname": "fuel_cost",
+   "fieldtype": "Data",
+   "label": "Fuel Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "insurance_cost",
+   "fieldtype": "Data",
+   "label": "Insurance Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_extra_cost",
+   "fieldtype": "Data",
+   "label": "Total Extra Cost",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_qpwi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hlkq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_jhjd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_djsi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_awms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lane",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-11 16:56:07.362062",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Shipment Booking",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

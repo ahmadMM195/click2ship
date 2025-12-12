@@ -1,0 +1,45 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+<section id="cover">
+    <div class="container">
+        <div class="quote-header"><h2>My Shipments</h2></div>
+    </div>
+    <div class="container">
+        <div class="row">
+            
+            {% include "click2ship_core/templates/includes/dashboard_left_nav.html" %}
+
+            <div class="col-md-9">
+                {% if bookings %}
+                    {% for b in bookings %}
+                    <div class="shipper-section">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="quote-wrapper">
+                                    <div class="quote-item">
+                                        <div class="flex-200">
+                                            <div class="quote-item-title">Barcode</div>
+                                            <div class="quote-item-desc">{{ b.shipment_barcode }}</div>
+                                        </div>
+                                        <div class="flex-100">
+                                            <div class="quote-item-title">Created On</div>
+                                            <div class="quote-item-desc">{{ b.creation }}</div>
+                                        </div>
+                                        <div class="flex-150">
+                                            <button onclick="window.open('{{ b.file_url }}', '_blank')" class="nav-btn -outlined">Download</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No shipments found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -3,9 +3,6 @@
 {% block content %}
 
 <script>
-
-/////////////////////////////////////////// For Via Express Get Quotes  ///////////////////////////////////////////////////////////////
-
 document.addEventListener("DOMContentLoaded", function () {
     // Select all buttons with name="rate"
     const quoteButtons = document.querySelectorAll('button[name="rate"]');
@@ -15,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault(); 
             const viacountryInput = document.getElementById("viacountry");
             const destinationCountryInput = document.getElementById("destinationCountry");
-            const destinationcityInput = document.getElementById("destinationcity");
             const lengthInput = document.getElementById("c-length");
             const widthInput = document.getElementById("c-width");
             const heightInput = document.getElementById("c-height");
@@ -29,8 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
             weightInput.classList.remove('is-invalid');
 
             const route_type = viacountryInput.value;
-            const destinationCountry = destinationCountryInput.value.toUpperCase();
-            const destinationcity = destinationcityInput.value.toUpperCase();
+            const destinationCountry = destinationCountryInput.value;
             const boxlength = parseFloat(lengthInput.value);
             const boxwidth = parseFloat(widthInput.value);
             const boxheight = parseFloat(heightInput.value);
@@ -61,7 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
             sessionStorage.setItem("quote_request", JSON.stringify({
                 route_type,
                 destinationCountry,
-                destinationcity,
                 boxlength,
                 boxwidth,
                 boxheight,
@@ -74,466 +68,115 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
-
-//////////////////////////// For International Get Quotes  /////////////////////////////////////////////////////////////
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Select all buttons with name="rate"
-    const interquoteButton = document.querySelectorAll('button[name="Inter_rate"]');
-
-    interquoteButton.forEach(button => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault(); 
-            const intdestinationCountryInput = document.getElementById("intdestinationCountry");
-            const intdestinationcityInput = document.getElementById("intdestinationcity");
-            const intlengthInput = document.getElementById("int-c-length");
-            const intwidthInput = document.getElementById("int-c-width");
-            const intheightInput = document.getElementById("int-c-height");
-            const intweightInput = document.getElementById("int-c-weight");
-
-            // Reset validation
-            intdestinationCountryInput.classList.remove('is-invalid');
-            intlengthInput.classList.remove('is-invalid');
-            intwidthInput.classList.remove('is-invalid');
-            intheightInput.classList.remove('is-invalid');
-            intweightInput.classList.remove('is-invalid');
-
-            const destinationCountry = intdestinationCountryInput.value.toUpperCase();
-            const destinationcity = intdestinationcityInput.value.toUpperCase();
-            const boxlength = parseFloat(intlengthInput.value);
-            const boxwidth = parseFloat(intwidthInput.value);
-            const boxheight = parseFloat(intheightInput.value);
-            const boxweight = parseFloat(intweightInput.value);
-            const route_type = 'International'
-
-            if (destinationCountry === "") {
-                intdestinationCountryInput.classList.add('is-invalid');
-                return;
-            }
-            if (isNaN(boxlength) || boxlength <= 0) {
-                intlengthInput.classList.add('is-invalid');
-                return;
-            }
-            if (isNaN(boxwidth) || boxwidth <= 0) {
-                intwidthInput.classList.add('is-invalid');
-                return;
-            }
-            if (isNaN(boxheight) || boxheight <= 0) {
-                intheightInput.classList.add('is-invalid');
-                return;
-            }
-            if (isNaN(boxweight) || boxweight <= 0) {
-                intweightInput.classList.add('is-invalid');
-                return;
-            }
-
-            // Store in sessionStorage
-            sessionStorage.setItem("quote_request", JSON.stringify({
-                destinationCountry,
-                destinationcity,
-                boxlength,
-                boxwidth,
-                boxheight,
-                boxweight,
-                route_type
-                
-            }));
-
-            // Redirect to results page
-            window.location.href = "/quote";
-        });
-    });
-});
-
-
-/////////////////////////////////////////// For Trucking Get Quotes  ///////////////////////////////////////////////////////////////
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    const terms = document.getElementById("terms");
-    const origin = document.getElementById("origin_city");
-    const type_ = document.getElementById("trucking_type");
-    const mode = document.getElementById("mode");
-    const from = document.getElementById("from_location");
-    const to = document.getElementById("to_location");
-    const equipment = document.getElementById("equipment");
-    const weightClass = document.getElementById("weight_class");
-    const route_type = 'Trucking'
-    const interCities = [
-        "Lahore","Faisalabad","Okara","Multan","Bawalpur","Shahdra","Sargodha",
-        "Gujrawala","Sialkot","Gujrat","Islamabad","Quetta","Peshawar","Sukkur",
-        "Hyderabad","Jhang","Rawalpindi","Hattar","Sahiwal"
-    ];
-
-    const intraTo = ["Old Site","New Site","Korangi","Port Qasim","HUB"];
-
-    const fromPTW = ["KICT","QICT"];
-    const fromWTW = ["HUB","Old Site","New Site","Port Qasim","PQ","Korangi"];
-
-    const equipmentOptions = {
-        "Intra City": [
-            "Open Suzuki","Open Shehzore","Open Mazda","Container Mazda 17ft",
-            "20ft Containerized","20ft Flatbed","40ft Containerized","40ft Flatbed"
-        ],
-        "Inter City": [
-            "20ft Containerized","20ft Flatbed","40ft Containerized","40ft Flatbed"
-        ]
-    };
-
-    const weightMap = {
-        "Open Suzuki": ["0-1 tons"],
-        "Open Shehzore": ["0-1.5 tons"],
-        "Open Mazda": ["0-5 tons"],
-        "Container Mazda 17ft": ["0-5 tons"],
-
-        "20ft Containerized": {
-            "Intra City": ["0-1 tons","0-1.5 tons","0-5 tons","05 Ton (2AX 6 Wheeler)","10 Ton (2AX 6 Wheeler)","15 Ton (3AX 10 Wheeler)","17 Ton (3AX 10 Wheeler)"],
-            "Inter City": ["05 Ton (2AX 6 Wheeler)","10 Ton (2AX 6 Wheeler)","15 Ton (3AX 10 Wheeler)","17 Ton (3AX 10 Wheeler)"]
-        },
-
-        "20ft Flatbed": ["15 Ton (3AX 10 Wheeler)","17 Ton (3AX 10 Wheeler)"],
-
-        "40ft Containerized": ["05Ton (14 Wheeler)","10TON (14Wheeler)","15Ton (14Wheeler)","20Ton (14Wheeler)","22Ton (14 Wheeler)","25Ton (18 Wheeler)","29Ton (18 Wheeler)","37Ton (22 Wheeler)"],
-        "40ft Flatbed": ["05Ton (14 Wheeler)","10TON (14Wheeler)","15Ton (14Wheeler)","20Ton (14Wheeler)","22Ton (14 Wheeler)","25Ton (18 Wheeler)","29Ton (18 Wheeler)","37Ton (22 Wheeler)"]
-    };
-
-    function setOptions(select, list) {
-        select.innerHTML = `<option value="">Select</option>`;
-        list.forEach(v => {
-            select.innerHTML += `<option value="${v}">${v}</option>`;
-        });
-    }
-
-    terms.addEventListener("change", () => {
-        origin.innerHTML = `<option value="Karachi">Karachi</option>`;
-        setOptions(to, terms.value === "Intra City" ? intraTo : interCities);
-        setOptions(equipment, equipmentOptions[terms.value] || []);
-        weightClass.innerHTML = "";
-    });
-
-    type_.addEventListener("change", () => {
-        if (type_.value === "PTW") {
-            mode.innerHTML = `<option value="Import">Import</option>`;
-            setOptions(from, fromPTW);
-        } else if (type_.value === "WTW") {
-            mode.innerHTML = `<option value="Replenishment">Replenishment</option>`;
-            setOptions(from, fromWTW);
-        }
-    });
-
-    equipment.addEventListener("change", () => {
-        const eq = equipment.value;
-        if (!eq) return;
-
-        const wm = weightMap[eq];
-        if (Array.isArray(wm)) {
-            setOptions(weightClass, wm);
-        } else {
-            setOptions(weightClass, wm[terms.value] || []);
-        }
-    });
-    
-    
-    const truckingquoteButton = document.querySelectorAll('button[name="trucking_rates"]');
-
-    truckingquoteButton.forEach(button => {
-        button.addEventListener("click", function (event) {
-            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-            event.preventDefault();
-
-            // Reset validation
-            terms.classList.remove('is-invalid');
-            origin.classList.remove('is-invalid');
-            type_.classList.remove('is-invalid');
-            mode.classList.remove('is-invalid');
-            from.classList.remove('is-invalid');
-            to.classList.remove('is-invalid');
-            equipment.classList.remove('is-invalid');
-            weightClass.classList.remove('is-invalid');
-
-          
-            if (terms === "") {
-                terms.classList.add('is-invalid');
-                return;
-            }
-
-            if (origin === "") {
-                origin.classList.add('is-invalid');
-                return;
-            }
-
-            if (type_ === "") {
-                type_.classList.add('is-invalid');
-                return;
-            }
-
-            if (mode === "") {
-                mode.classList.add('is-invalid');
-                return;
-            }
-
-            if (from === "") {
-                from.classList.add('is-invalid');
-                return;
-            }
-
-            if (to === "") {
-                to.classList.add('is-invalid');
-                return;
-            }
-
-            if (equipment === "") {
-                equipment.classList.add('is-invalid');
-                return;
-            }
-
-            if (weightClass === "") {
-                weightClass.classList.add('is-invalid');
-                return;
-            }
-            console.log("!!!!!!@@@@@@@@@@@@##########$$$$$$$$$$$$$$$$$$$$$$$$")
-            console.log(terms.value)
-            console.log(origin.value)
-            console.log(type_.value)
-            console.log(mode.value)
-            console.log(from.value)
-            
-            const terms_val = terms.value;
-            const origin_val = origin.value;
-            const type_val = type_.value;
-            const mode_val = mode.value;
-            const from_val = from.value;
-            const to_val = to.value;
-            const equipment_val = equipment.value;
-            const weightClass_val = weightClass.value;           
-
-            // Store in sessionStorage
-            sessionStorage.setItem("quote_request", JSON.stringify({
-                terms_val,
-                origin_val,
-                type_val,
-                mode_val,
-                from_val,
-                to_val,
-                equipment_val,
-                weightClass_val,
-                route_type
-                
-            }));
-
-            // Redirect to results page
-            window.location.href = "/quote";
-        });
-    });
-
-});
-
-
-
-
-function frappeFetch(doctype, fields = [], filters = null, order_by = null) {
-    let url = `/api/resource/${encodeURIComponent(doctype)}?fields=${encodeURIComponent(JSON.stringify(fields))}&limit_page_length=3000`;
-
-    if (filters) {
-        url += `&filters=${encodeURIComponent(JSON.stringify(filters))}`;
-    }
-    if (order_by) {
-        url += `&order_by=${encodeURIComponent(order_by)}`;
-    }
-
-    return fetch(url, {
-        headers: {
-            'Accept': 'application/json',
-            'X-Frappe-CSRF-Token': frappe.csrf_token
-        }
-    }).then(res => res.json());
-}
-
 function load_ports(country, target) {
     if (!country) {
         $(target).html('<option value="">Port</option>');
         return;
     }
 
-    frappeFetch(
-        "Sea Port",
-        ["name", "port_name"],
-        { country: country },
-        "port_name asc"
-    ).then(r => {
-        let opts = `<option value="">Port</option>`;
-        (r.data || []).forEach(p => {
-            opts += `<option value="${p.name}">${p.port_name}</option>`;
-        });
-        $(target).html(opts);
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Sea Port",
+            filters: { country: country },
+            fields: ["name", "port_name"],
+            order_by: "port_name asc"
+        },
+        callback(r) {
+            let opts = `<option value="">Port</option>`;
+            r.message.forEach(p => {
+                opts += `<option value="${p.name}">${p.port_name}</option>`;
+            });
+            $(target).html(opts);
+        }
     });
 }
+
 function load_shipment_types() {
-    frappeFetch("Shipment Type", ["name"])
-        .then(r => {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Shipment Type",
+            fields: ["name"]
+        },
+        callback(r) {
             let opts = '';
-            (r.data || []).forEach(t => {
+            r.message.forEach(t => {
                 opts += `<option value="${t.name}">${t.name}</option>`;
             });
             $('#shipment_type').html(opts);
-        });
+        }
+    });
+}
+
+function load_cities() {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "City",
+            fields: ["name"],
+            order_by: "name asc"
+        },
+        callback(r) {
+            let opts = '';
+            r.message.forEach(c => {
+                opts += `<option value="${c.name}">${c.name}</option>`;
+            });
+            $('#origin_city').html(opts);
+        }
+    });
 }
 function load_types() {
-    frappeFetch("Trucking Type", ["name"])
-        .then(r => {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Trucking Type",
+            fields: ["name"]
+        },
+        callback(r) {
             let opts = '';
-            (r.data || []).forEach(t => {
+            r.message.forEach(t => {
                 opts += `<option>${t.name}</option>`;
             });
             $('#trucking_type').html(opts);
-        });
+        }
+    });
 }
+
 function load_locations() {
-    frappeFetch("Trucking Location", ["name"])
-        .then(r => {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Trucking Location",
+            fields: ["name"]
+        },
+        callback(r) {
             let opts = '';
-            (r.data || []).forEach(l => {
+            r.message.forEach(l => {
                 opts += `<option>${l.name}</option>`;
             });
             $('#from_location, #to_location').html(opts);
-        });
+        }
+    });
 }
 function load_equipment() {
-    frappeFetch("Trucking Equipment", ["name"])
-        .then(r => {
+    frappe.call({
+        method: "frappe.client.get_list",
+        args: {
+            doctype: "Trucking Equipment",
+            fields: ["name"]
+        },
+        callback(r) {
             let opts = '';
-            (r.data || []).forEach(e => {
+            r.message.forEach(e => {
                 opts += `<option>${e.name}</option>`;
             });
             $('#equipment').html(opts);
-        });
-}
- 
-function load_cities(country='PK',elementid='origin_city') { 
-    const filters = encodeURIComponent(JSON.stringify([
-        ["country", "=", country]
-    ]));
-
-    fetch(`/api/resource/City?fields=["name"]&filters=${filters}&order_by=name asc&limit_page_length=10000`, {
-        headers: { 'Accept': 'application/json' }
-    })
-    .then(res => res.json())
-    .then(data => {
-        let opts = '';
-        (data.data || []).forEach(c => {
-            opts += `<option value="${c.name}">${c.name}</option>`;
-        });
-        document.getElementById(elementid).innerHTML = opts;
-    }); 
-} 
-function load_countries(elementid) {
-    fetch('/api/resource/Country?fields=["name","code"]&order_by=name asc&limit_page_length=500', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json'
         }
-    })
-    .then(res => res.json())
-    .then(data => {
-        let opts = '<option value="">Select Country</option>';
-        (data.data || []).forEach(c => {
-            opts += `<option value="${c.code}">${c.name}</option>`;
-        });
-         $(elementid).html(opts);
-    })
-    .catch(err => console.error(err));
-}
-
-let airports = [];
-
-async function fetchAirports() {
-    let res = await fetch("/api/method/click2ship_core.api.air_freight.get_airports");
-    let data = await res.json();
-    if (data.message) {
-        airports = data.message.map(a => ({
-            label: `${a.airport_code} - ${a.airport_name} (${a.city})`,
-            value: a.airport_code
-        }));
-    }
-}
-
-// Generic autocomplete function
-function autocomplete(input, listId) {
-    input.addEventListener("input", function() {
-        const val = this.value.toLowerCase();
-        closeAllLists();
-        if (!val) return false;
-
-        const list = document.getElementById(listId);
-        list.innerHTML = '';
-        airports.filter(a => a.label.toLowerCase().includes(val))
-                .forEach(a => {
-                    const item = document.createElement("div");
-                    item.innerHTML = a.label;
-                    item.addEventListener("click", () => {
-                        input.value = a.value;
-                        closeAllLists();
-                    });
-                    list.appendChild(item);
-                });
-    });
-
-    function closeAllLists() {
-        document.querySelectorAll('.autocomplete-items').forEach(el => el.innerHTML = '');
-    }
-
-    document.addEventListener("click", function(e) {
-        if (e.target !== input) closeAllLists();
     });
 }
 
-document.addEventListener("DOMContentLoaded", async function() {
-    console.log("Document loaded");
-    load_countries("#destinationCountry");
-    load_countries("#intdestinationCountry");
-    await fetchAirports();
-    autocomplete(document.getElementById("origin"), "origin-list");
-    autocomplete(document.getElementById("destination"), "destination-list");
-    document.getElementById("destinationCountry").addEventListener("change", async function() {
-
-        console.log("Destination country changed",this);
-        const select = this;
-
-        const countryValue = select.value; // value attribute
-        const countryText  = select.options[select.selectedIndex].text; // visible text
-        load_cities(countryText,'destinationcity'); 
-    });
-    document.getElementById("intdestinationCountry").addEventListener("change", async function() {
-
-        console.log("intdestinationCountry country changed");
-        const select = this;
-
-        const countryValue = select.value; // value attribute
-        const countryText  = select.options[select.selectedIndex].text; // visible text
-        load_cities(countryText,'intdestinationcity'); 
-    });
-
-    document.getElementById("search-btn").addEventListener("click", async function() {
-        let origin = document.getElementById("origin").value;
-        let destination = document.getElementById("destination").value;
-        let weight = document.getElementById("weight").value;
-
-        if (!origin || !destination || !weight) {
-            alert("Please select origin, destination, and enter weight");
-            return;
-        }
-
-        let url = `/api/method/click2ship_core.api.air_freight.get_air_tariff?origin_airport_code=${origin}&destination_airport_code=${destination}&weight=${weight}`;
-        let res = await fetch(url);
-        let data = await res.json();
-
-        document.getElementById("result").innerText = JSON.stringify(data.message, null, 2);
-    });
-}); 
 </script>
-
     <section id="banner">
      <div class="container">   <div class="row">
         
@@ -546,7 +189,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                         <a data-bs-toggle="tab" id="international-tab" role="tab" href="#international" class="nav-link">International Courier</a>
                     </li>
                     <li class="nav-item">
-                        <a data-bs-toggle="tab" id="viauk-tab" role="tab" class="nav-link active" href="#viauk">Via Express</a>
+                        <a data-bs-toggle="tab" id="international-tab" role="tab" class="nav-link active" href="#viauk">Via Express</a>
                     </li>
                     <li class="nav-item">
                         <a data-bs-toggle="tab" id="air-tab" role="tab" href="#air" class="nav-link">Air Freight</a>
@@ -562,7 +205,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                     </li>
                     </ul>
                     <div class="tab-content bg-white border p-4" id="serviceTabContent">
-                        <div class="tab-pane active show fade" id="viauk">
+                        <div class="tab-pane active show fade" id="viauk" id="international-tab">
                           <form id="quoteForm" onsubmit="handleQuoteForm(event)">
                             <div class="row">
                                 <div class="col-md-2">
@@ -582,14 +225,253 @@ document.addEventListener("DOMContentLoaded", async function() {
                                 </div>
                                 <div class="col-md-2">
                                     <label for="" class="form-label">Select Destination</label>
-                                        <select name="destination" id="destinationCountry" class="form-select country-select">
-                                            <option value=""></option> 
-                                        </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="" class="form-label">Select City</label>
-                                        <select name="destinationcity" id="destinationcity" class="form-select city-select">
-                                            <option value=""></option> 
+                                        <select name="destination" id="destinationCountry" class="form-select">
+                                            <option value=""></option>
+                                            <option value="AF">Afghanistan</option>
+                                            <option value="AL">Albania</option>
+                                            <option value="DZ">Algeria</option>
+                                            <option value="AS">American Samoa</option>
+                                            <option value="AD">Andorra</option>
+                                            <option value="AO">Angola</option>
+                                            <option value="AI">Anguilla</option>
+                                            <option value="AQ">Antarctica</option>
+                                            <option value="AG">Antigua and Barbuda</option>
+                                            <option value="AR">Argentina</option>
+                                            <option value="AM">Armenia</option>
+                                            <option value="AW">Aruba</option>
+                                            <option value="AU">Australia</option>
+                                            <option value="AT">Austria</option>
+                                            <option value="AZ">Azerbaijan</option>
+                                            <option value="BS">Bahamas</option>
+                                            <option value="BH">Bahrain</option>
+                                            <option value="BD">Bangladesh</option>
+                                            <option value="BB">Barbados</option>
+                                            <option value="BY">Belarus</option>
+                                            <option value="BE">Belgium</option>
+                                            <option value="BZ">Belize</option>
+                                            <option value="BJ">Benin</option>
+                                            <option value="BM">Bermuda</option>
+                                            <option value="BT">Bhutan</option>
+                                            <option value="BO">Bolivia</option>
+                                            <option value="BA">Bosnia and Herzegovina</option>
+                                            <option value="BW">Botswana</option>
+                                            <option value="BV">Bouvet Island</option>
+                                            <option value="BR">Brazil</option>
+                                            <option value="IO">British Indian Ocean Territory</option>
+                                            <option value="BN">Brunei Darussalam</option>
+                                            <option value="BG">Bulgaria</option>
+                                            <option value="BF">Burkina Faso</option>
+                                            <option value="BI">Burundi</option>
+                                            <option value="KH">Cambodia</option>
+                                            <option value="CM">Cameroon</option>
+                                            <option value="CA">Canada</option>
+                                            <option value="CV">Cape Verde</option>
+                                            <option value="KY">Cayman Islands</option>
+                                            <option value="CF">Central African Republic</option>
+                                            <option value="TD">Chad</option>
+                                            <option value="CL">Chile</option>
+                                            <option value="CN">China</option>
+                                            <option value="CX">Christmas Island</option>
+                                            <option value="CC">Cocos (Keeling) Islands</option>
+                                            <option value="CO">Colombia</option>
+                                            <option value="KM">Comoros</option>
+                                            <option value="CG">Congo</option>
+                                            <option value="CD">Congo, Democratic Republic</option>
+                                            <option value="CK">Cook Islands</option>
+                                            <option value="CR">Costa Rica</option>
+                                            <option value="CI">Ivory Coast</option>
+                                            <option value="HR">Croatia</option>
+                                            <option value="CU">Cuba</option>
+                                            <option value="CY">Cyprus</option>
+                                            <option value="CZ">Czech Republic</option>
+                                            <option value="DK">Denmark</option>
+                                            <option value="DJ">Djibouti</option>
+                                            <option value="DM">Dominica</option>
+                                            <option value="DO">Dominican Republic</option>
+                                            <option value="EC">Ecuador</option>
+                                            <option value="EG">Egypt</option>
+                                            <option value="SV">El Salvador</option>
+                                            <option value="GQ">Equatorial Guinea</option>
+                                            <option value="ER">Eritrea</option>
+                                            <option value="EE">Estonia</option>
+                                            <option value="ET">Ethiopia</option>
+                                            <option value="FK">Falkland Islands</option>
+                                            <option value="FO">Faroe Islands</option>
+                                            <option value="FJ">Fiji</option>
+                                            <option value="FI">Finland</option>
+                                            <option value="FR">France</option>
+                                            <option value="GF">French Guiana</option>
+                                            <option value="PF">French Polynesia</option>
+                                            <option value="TF">French Southern Territories</option>
+                                            <option value="GA">Gabon</option>
+                                            <option value="GM">Gambia</option>
+                                            <option value="GE">Georgia</option>
+                                            <option value="DE">Germany</option>
+                                            <option value="GH">Ghana</option>
+                                            <option value="GI">Gibraltar</option>
+                                            <option value="GR">Greece</option>
+                                            <option value="GL">Greenland</option>
+                                            <option value="GD">Grenada</option>
+                                            <option value="GP">Guadeloupe</option>
+                                            <option value="GU">Guam</option>
+                                            <option value="GT">Guatemala</option>
+                                            <option value="GN">Guinea</option>
+                                            <option value="GW">Guinea-Bissau</option>
+                                            <option value="GY">Guyana</option>
+                                            <option value="HT">Haiti</option>
+                                            <option value="HM">Heard Island and McDonald Islands</option>
+                                            <option value="VA">Vatican City</option>
+                                            <option value="HN">Honduras</option>
+                                            <option value="HK">Hong Kong</option>
+                                            <option value="HU">Hungary</option>
+                                            <option value="IS">Iceland</option>
+                                            <option value="IN">India</option>
+                                            <option value="ID">Indonesia</option>
+                                            <option value="IR">Iran, Islamic Republic Of</option>
+                                            <option value="IQ">Iraq</option>
+                                            <option value="IE">Ireland</option>
+                                            <option value="IL">Israel</option>
+                                            <option value="IT">Italy</option>
+                                            <option value="JM">Jamaica</option>
+                                            <option value="JP">Japan</option>
+                                            <option value="JO">Jordan</option>
+                                            <option value="KZ">Kazakhstan</option>
+                                            <option value="KE">Kenya</option>
+                                            <option value="KI">Kiribati</option>
+                                            <option value="KP">Korea, Democratic Peoples Republic</option>
+                                            <option value="KR">Korea, Republic Of</option>
+                                            <option value="KW">Kuwait</option>
+                                            <option value="KG">Kyrgyzstan</option>
+                                            <option value="LA">Lao Peoples Democratic Republic</option>
+                                            <option value="LV">Latvia</option>
+                                            <option value="LB">Lebanon</option>
+                                            <option value="LS">Lesotho</option>
+                                            <option value="LR">Liberia</option>
+                                            <option value="LY">Libya</option>
+                                            <option value="LI">Liechtenstein</option>
+                                            <option value="LT">Lithuania</option>
+                                            <option value="LU">Luxembourg</option>
+                                            <option value="MO">Macau</option>
+                                            <option value="MK">North Macedonia</option>
+                                            <option value="MG">Madagascar</option>
+                                            <option value="MW">Malawi</option>
+                                            <option value="MY">Malaysia</option>
+                                            <option value="MV">Maldives</option>
+                                            <option value="ML">Mali</option>
+                                            <option value="MT">Malta</option>
+                                            <option value="MH">Marshall Islands</option>
+                                            <option value="MQ">Martinique</option>
+                                            <option value="MR">Mauritania</option>
+                                            <option value="MU">Mauritius</option>
+                                            <option value="YT">Mayotte</option>
+                                            <option value="MX">Mexico</option>
+                                            <option value="FM">Micronesia</option>
+                                            <option value="MD">Moldova</option>
+                                            <option value="MC">Monaco</option>
+                                            <option value="MN">Mongolia</option>
+                                            <option value="MS">Montserrat</option>
+                                            <option value="MA">Morocco</option>
+                                            <option value="MZ">Mozambique</option>
+                                            <option value="MM">Myanmar</option>
+                                            <option value="NA">Namibia</option>
+                                            <option value="NR">Nauru</option>
+                                            <option value="NP">Nepal</option>
+                                            <option value="NL">Netherlands</option>
+                                            <option value="XC">Curacao</option>
+                                            <option value="NC">New Caledonia</option>
+                                            <option value="NZ">New Zealand</option>
+                                            <option value="NI">Nicaragua</option>
+                                            <option value="NE">Niger</option>
+                                            <option value="NG">Nigeria</option>
+                                            <option value="NU">Niue</option>
+                                            <option value="NF">Norfolk Island</option>
+                                            <option value="MP">Northern Mariana Islands</option>
+                                            <option value="NO">Norway</option>
+                                            <option value="OM">Oman</option>
+                                            <option value="PK">Pakistan</option>
+                                            <option value="PW">Palau</option>
+                                            <option value="PS">Palestinian Occupied Territory</option>
+                                            <option value="PA">Panama</option>
+                                            <option value="PG">Papua New Guinea</option>
+                                            <option value="PY">Paraguay</option>
+                                            <option value="PE">Peru</option>
+                                            <option value="PH">Philippines</option>
+                                            <option value="PN">Pitcairn</option>
+                                            <option value="PL">Poland</option>
+                                            <option value="PT">Portugal</option>
+                                            <option value="PR">Puerto Rico</option>
+                                            <option value="QA">Qatar</option>
+                                            <option value="RE">Reunion</option>
+                                            <option value="RO">Romania</option>
+                                            <option value="RU">Russian Federation</option>
+                                            <option value="RW">Rwanda</option>
+                                             <option value="SH">Saint Helena</option>
+                                             <option value="KN">Saint Kitts And Nevis</option>
+                                             <option value="LC">Saint Lucia</option>
+                                             <option value="PM">Saint Pierre and Miquelon</option>
+                                             <option value="VC">Saint Vincent And The Grenadines</option>
+                                             <option value="BL">Saint-Barthelemy</option>
+                                             <option value="MF">Saint-Martin (French part)</option>
+                                             <option value="WS">Samoa</option>
+                                             <option value="SM">San Marino</option>
+                                             <option value="ST">Sao Tome and Principe</option>
+                                             <option value="SA">Saudi Arabia</option>
+                                             <option value="SN">Senegal</option>
+                                             <option value="RS">Serbia</option>
+                                             <option value="SC">Seychelles</option>
+                                             <option value="SL">Sierra Leone</option>
+                                             <option value="SG">Singapore</option>
+                                             <option value="SK">Slovakia</option>
+                                             <option value="SI">Slovenia</option>
+                                             <option value="SB">Solomon Islands</option>
+                                             <option value="SO">Somalia</option>
+                                             <option value="ZA">South Africa</option>
+                                             <option value="GS">South Georgia</option>
+                                             <option value="SS">South Sudan</option>
+                                             <option value="ES">Spain</option>
+                                             <option value="LK">Sri Lanka</option>
+                                             <option value="SD">Sudan</option>
+                                             <option value="SR">Suriname</option>
+                                             <option value="SJ">Svalbard And Jan Mayen Islands</option>
+                                             <option value="SZ">Swaziland</option>
+                                             <option value="SE">Sweden</option>
+                                             <option value="CH">Switzerland</option>
+                                             <option value="SY">Syria</option>
+                                             <option value="TW">Taiwan</option>
+                                             <option value="TJ">Tajikistan</option>
+                                             <option value="TZ">Tanzania</option>
+                                             <option value="TH">Thailand</option>
+                                             <option value="TG">Togo</option>
+                                             <option value="TK">Tokelau</option>
+                                             <option value="TO">Tonga</option>
+                                             <option value="TT">Trinidad And Tobago</option>
+                                             <option value="TN">Tunisia</option>
+                                             <option value="TR">Turkey</option>
+                                             <option value="TM">Turkmenistan</option>
+                                             <option value="TC">Turks And Caicos Islands</option>
+                                             <option value="TV">Tuvalu</option>
+                                             <option value="UG">Uganda</option>
+                                             <option value="UA">Ukraine</option>
+                                             <option value="AE">United Arab Emirates</option>
+                                             <option value="GB">United Kingdom</option>
+                                             <option value="US">United States</option>
+                                             <option value="UM">United States Minor Outlying Islands</option>
+                                             <option value="UY">Uruguay</option>
+                                             <option value="UZ">Uzbekistan</option>
+                                             <option value="VU">Vanuatu</option>
+                                             <option value="VA">Vatican City State (Holy See)</option>
+                                             <option value="VE">Venezuela</option>
+                                             <option value="VN">Vietnam</option>
+                                             <option value="VG">Virgin Islands (British)</option>
+                                             <option value="VI">Virgin Islands (US)</option>
+                                             <option value="WF">Wallis And Futuna Islands</option>
+                                             <option value="EH">Western Sahara</option>
+                                             <option value="YE">Yemen</option>
+                                             <option value="ZM">Zambia</option>
+                                             <option value="ZW">Zimbabwe</option>
+                                             <option value="XK">Kosovo</option>
+                                             <option value="CW">Curaçao</option>
+                                             <option value="SX">Sint Maarten (Dutch part)</option>
                                         </select>
                                 </div>
                                 <div class="col-md-3">
@@ -655,7 +537,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                           </form>
                         </div>
                         
-                        <div class="tab-pane   fade" id="air">
+                        <div class="tab-pane   fade" id="air"  id="air-tab">
                             <div class="row">
                                 <div class="col-md-4">
                                     <label for="" class="form-label">Select Origin</label>
@@ -683,11 +565,77 @@ document.addEventListener("DOMContentLoaded", async function() {
                             <!-- Add this -->
 <pre id="result" style="white-space: pre-wrap; background:#f4f4f4; padding:10px; border:1px solid #ccc; margin-top:10px;"></pre>
                             </div>
+<script>
+let airports = [];
 
+async function fetchAirports() {
+    let res = await fetch("/api/method/click2ship_core.api.air_freight.get_airports");
+    let data = await res.json();
+    if (data.message) {
+        airports = data.message.map(a => ({
+            label: `${a.airport_code} - ${a.airport_name} (${a.city})`,
+            value: a.airport_code
+        }));
+    }
+}
+
+// Generic autocomplete function
+function autocomplete(input, listId) {
+    input.addEventListener("input", function() {
+        const val = this.value.toLowerCase();
+        closeAllLists();
+        if (!val) return false;
+
+        const list = document.getElementById(listId);
+        list.innerHTML = '';
+        airports.filter(a => a.label.toLowerCase().includes(val))
+                .forEach(a => {
+                    const item = document.createElement("div");
+                    item.innerHTML = a.label;
+                    item.addEventListener("click", () => {
+                        input.value = a.value;
+                        closeAllLists();
+                    });
+                    list.appendChild(item);
+                });
+    });
+
+    function closeAllLists() {
+        document.querySelectorAll('.autocomplete-items').forEach(el => el.innerHTML = '');
+    }
+
+    document.addEventListener("click", function(e) {
+        if (e.target !== input) closeAllLists();
+    });
+}
+
+document.addEventListener("DOMContentLoaded", async function() {
+    await fetchAirports();
+    autocomplete(document.getElementById("origin"), "origin-list");
+    autocomplete(document.getElementById("destination"), "destination-list");
+
+    document.getElementById("search-btn").addEventListener("click", async function() {
+        let origin = document.getElementById("origin").value;
+        let destination = document.getElementById("destination").value;
+        let weight = document.getElementById("weight").value;
+
+        if (!origin || !destination || !weight) {
+            alert("Please select origin, destination, and enter weight");
+            return;
+        }
+
+        let url = `/api/method/click2ship_core.api.air_freight.get_air_tariff?origin_airport_code=${origin}&destination_airport_code=${destination}&weight=${weight}`;
+        let res = await fetch(url);
+        let data = await res.json();
+
+        document.getElementById("result").innerText = JSON.stringify(data.message, null, 2);
+    });
+});
+</script>
 
                         </div>
 
-                        <div class="tab-pane   fade" id="sea">
+                        <div class="tab-pane   fade" id="sea"  id="sea-tab">
                               <div class="row"> 
                                 <!-- ORIGIN -->
                                 <div class="col-md-4">
@@ -738,7 +686,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                                 Get Rates
                                 </button>   
                         </div> 
-                        <div class="tab-pane   fade" id="domestic" >
+                        <div class="tab-pane   fade" id="domestic"  id="domestic-tab">
                               <form action="" method="post"> 
                                     <div class="row border p-4">
                                         <div class="col-md-3">
@@ -3017,156 +2965,45 @@ document.addEventListener("DOMContentLoaded", async function() {
                                     <button class="btn btn-danger">Get Rates</button>
                                 </div>
                                 </form>  
+                        </div> 
+                        <div class="tab-pane   fade" id="international"  id="international-tab">
+                               
                         </div>
-                        
- <!-- ******************************************* international-tab HTML Start *****************************************************************-->
-                        <div class="tab-pane   fade" id="international" >
-                               <form id="quoteForm" onsubmit="handleQuoteForm(event)">
-                                
-                            <div class="row">
+                        <div class="tab-pane   fade" id="trucking"  id="trucking-tab">
+                               <div class="row"> 
                                 <div class="col-md-2">
-                                    <label for="" class="form-label">Select Origin</label>
-                                    <input type="hidden" name="type" value="express">
-                                    <select name="origin" id="originCountry" class="form-select">
-                                        <option value="PK">Pakistan</option>
-                                        </select>
+                                    <label>Origin</label>
+                                    <select id="origin_city" class="form-control"></select>
                                 </div>
+
                                 <div class="col-md-2">
-                                    <label for="" class="form-label">Select Destination</label>
-                                        <select name="intdestination" id="intdestinationCountry" class="form-select">
-                                            <option value=""></option> 
-                                        </select>
+                                    <label>Type</label>
+                                    <select id="trucking_type" class="form-control"></select>
                                 </div>
+
                                 <div class="col-md-2">
-                                    <label for="" class="form-label">Select City</label>
-                                        <select name="intdestinationcity" id="intdestinationcity" class="form-select">
-                                            <option value=""></option> 
-                                        </select>
+                                    <label>From</label>
+                                    <select id="from_location" class="form-control"></select>
                                 </div>
+
+                                <div class="col-md-2">
+                                    <label>To</label>
+                                    <select id="to_location" class="form-control"></select>
+                                </div>
+
                                 <div class="col-md-3">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Length</label>
-            
-                                                <div class="input-group">
-                                                    <input name="length" id="int-c-length" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
-                                                    <div class="input-group-text">
-                                                        cm
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Width</label>
-            
-                                                <div class="input-group">
-                                                    <input name="width" id="int-c-width" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
-                                                    <div class="input-group-text">
-                                                        cm
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <label>Equipment</label>
+                                    <select id="equipment" class="form-control"></select>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Height</label>
-            
-                                                <div class="input-group">
-                                                    <input name="height" id="int-c-height" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
-                                                    <div class="input-group-text">
-                                                        cm
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Weight</label>
-            
-                                                <div class="input-group">
-                                                    <input name="weight" id="int-c-weight" type="number" class="form-control form-control-lg" placeholder="0.0" step="0.01" min="0.01">
-                                                    <div class="input-group-text">
-                                                        Kg
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                 </div>
-                                <div class="col-md-3 ms-auto text-end mt-2">
-                                    <button class="btn btn-lg w-100 btn-danger" name="Inter_rate" type="submit">Get Quote</button>
-                                </div>
-                            </div>
-                          </form>
+
+                                <br>
+
+                                <button class="btn btn-danger pull-right" id="get_rates">
+                                Get Rates
+                                </button>
                         </div>
- <!-- ******************************************* international-tab HTML End *****************************************************************-->
- 
- <!-- ******************************************* trucking-tab HTML Start *****************************************************************-->
-                        <div class="tab-pane fade" id="trucking">
-    <div class="row">
-
-        <div class="col-md-2">
-            <label>Terms</label>
-            <select id="terms" class="form-control">
-                <option value="">Select</option>
-                <option value="Intra City">Intra City</option>
-                <option value="Inter City">Inter City</option>
-            </select>
-        </div>
-
-        <div class="col-md-2">
-            <label>Origin</label>
-            <select id="origin_city" class="form-control">
-                <option value="">Select</option>
-            </select>
-        </div>
-
-        <div class="col-md-2">
-            <label>Type</label>
-            <select id="trucking_type" class="form-control">
-                <option value="">Select</option>
-                <option value="WTW">Warehouse to Warehouse</option>
-                <option value="PTW">Port to Warehouse</option>
-            </select>
-        </div>
-
-        <div class="col-md-2">
-            <label>Mode</label>
-            <select id="mode" class="form-control" disabled></select>
-        </div>
-
-        <div class="col-md-2">
-            <label>From</label>
-            <select id="from_location" class="form-control"></select>
-        </div>
-
-        <div class="col-md-2">
-            <label>To</label>
-            <select id="to_location" class="form-control"></select>
-        </div>
-
-        <div class="col-md-3 mt-3">
-            <label>Equipment</label>
-            <select id="equipment" class="form-control"></select>
-        </div>
-
-        <div class="col-md-3 mt-3">
-            <label>Weight Class</label>
-            <select id="weight_class" class="form-control"></select>
-        </div>
-
-    </div>
-
-    <br>
-    <button class="btn btn-danger pull-right" name="trucking_rates" type="submit" >Get Rates</button>
-</div>
- <!-- ******************************************* trucking-tab HTML End *****************************************************************-->
                     </div>
                 </div>
             </div>

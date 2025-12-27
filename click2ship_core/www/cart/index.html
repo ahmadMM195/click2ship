@@ -137,8 +137,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (r.message && r.message.status === "success") {
                 const quote_data = r.message.data.quote;
                 const booking_data = r.message.data.booking;
-
+                
                 console.log("Provider:", quote_data.Provider);
+                
+                console.log("Provider:", booking_data);
                 // Step 2: book shipment
                 let bookingApiUrl;
                 if (quote_data.Provider === 'Norsk') {
@@ -169,7 +171,18 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(r => {
             console.log("Shipment booked:", r);
             // Redirect or show barcode
-            // window.location.href = "/label"; 
+            fetch("/api/method/click2ship_core.api.call.session_save", {
+		    method: "POST",
+		    headers: {
+			"Content-Type": "application/json",
+			"X-Frappe-CSRF-Token": csrfToken
+		    },
+		    body: JSON.stringify({
+			shipment_id: r.shipment_id
+		    }),
+		    credentials: "include"
+            });
+            window.location.href = "/success"; 
         })
         .catch(err => {
             console.error("Error booking shipment:", err);

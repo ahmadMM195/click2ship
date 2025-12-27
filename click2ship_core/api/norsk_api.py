@@ -60,7 +60,7 @@ def rates():
         if not raw_data:
             frappe.throw("No quote input data received.")
         quote_input = json.loads(raw_data)
-
+        
         # Step 2: Build Norsk quoteData using input
         quote_data = {
             "Zipcode": quote_input.get("destinationZipcode") or quote_input.get("receiverZipcode") or "33409",
@@ -105,9 +105,13 @@ def rates():
 
         response_data = response.json()
         usd_rate = get_exchange_rate("GBP")
+        for quote in response_data.get("Quotes", []):
+            quote['payload'] = quote_data
+            print("Added norsk_payload to quote:", quote_data)
 
         if usd_rate:
             for quote in response_data.get("Quotes", []):
+                print("Original quote_data:", quote_data)
                 quote['TotalCost'] = round(quote['TotalCost'] * usd_rate, 2)
                 quote['BaseCost'] = round(quote['BaseCost'] * usd_rate, 2)
                 quote['FuelCost'] = round(quote['FuelCost'] * usd_rate, 2)
@@ -118,7 +122,6 @@ def rates():
                         if isinstance(value, (int, float)):
                             quote["ExtraCosts"][key] = round(value * usd_rate, 2)
                     quote["AdjustedTotalCost"] = round(quote["AdjustedTotalCost"] * usd_rate, 2)
-
             response_data['Currency'] = "USD"
         
         return response_data

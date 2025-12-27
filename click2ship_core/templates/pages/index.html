@@ -15,12 +15,19 @@
                     <li class="nav-item">
                         <a data-bs-toggle="tab" id="air-tab" role="tab" href="#air" class="nav-link">Air Freight</a>
                     </li>
+                    
                     <li class="nav-item">
+                         <a data-bs-toggle="tab" id="sea-tab" role="tab" href="#sea" class="nav-link">Sea Freight</a>
+                    </li>
+                     <li class="nav-item">
+                        <a data-bs-toggle="tab" id="domestic-tab" role="tab" href="#domestic" class="nav-link">Domestic</a>
+                    </li>
+                    <!-- <li class="nav-item">
                         <a  href="sea.html" class="nav-link">Sea Freight</a>
                     </li>
                      <li class="nav-item">
                         <a  href="domestic.html" class="nav-link">Domestic</a>
-                    </li>
+                    </li> -->
                      <li class="nav-item">
                         <a href="warehousing.html"class="nav-link">Warehousing</a>
                     </li>
@@ -32,7 +39,16 @@
                         <div class="tab-pane active show fade" id="international" id="international-tab">
                           <form id="frmExpress" method="post" action="https://web.click2ship.net/express">
                                 <div class="row">
-                                <div class="col-md-3">
+                                     <div class="col-md-2">
+                                    <label for="" class="form-label">Select Via Country</label>
+                                   
+                                    <select name="viacountry" id="viacountry" class="form-select">
+                                        <option value="uk">UK</option>
+                                        <option value="uae">UAE</option>
+                                        </select>
+                                </div>
+
+                                <div class="col-md-2">
                                     <label for="" class="form-label">Select Origin</label>
                                     <input type="hidden" name="type" value="express">
                                     <select name="origin" id="origin" class="form-select">
@@ -40,7 +56,7 @@
                                <option value="PK"> Pakistan</option>
                             </select>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label for="" class="form-label">Select Destination</label>
                                      <select name="destination" id="destination" class="form-select">
                                     <option value=""></option>
@@ -435,6 +451,12 @@
                             </div>
                             </div>
                         </form>
+                        </div>
+                        <div class="tab-pane   fade" id="sea"  id="sea-tab">
+
+                        </div> 
+                        <div class="tab-pane   fade" id="domestic"  id="domestic-tab">
+
                         </div>
                     </div>
                 </div>

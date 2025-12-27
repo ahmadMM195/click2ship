@@ -1,0 +1,146 @@
+{% extends "click2ship_core/templates/layout.html" %}
+
+{% block content %}
+
+<div id="cached-bookings"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    fetch("/api/method/click2ship_core.api.call.session_data")
+        .then(res => res.json())
+        .then(result => {
+            const container = document.getElementById("cached-bookings");
+
+            if(result.message){
+                const data = result.message;
+                if(Object.keys(data).length === 0){
+                    container.innerHTML = "<p>No booking data in cache.</p>";
+                } else {
+                    container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
+                }
+            }
+        })
+        .catch(err => console.error("Error fetching cached booking:", err));
+});
+</script>
+
+<section id="cover">
+    <div class="container">
+        <div class="quote-header">
+            <h2>Shipment Booked Successfully 🎉</h2>
+            <p class="text-muted mt-2">
+                Your shipment has been created. You can print the documents below.
+            </p>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+                <div class="quote-wrapper">
+                    <div class="quote-item flex-column text-center p-4">
+
+                        <h4 class="mb-4">Shipment Documents</h4>
+
+                        <button id="printLabelBtn"
+                                class="nav-btn -outlined mb-3 w-100"
+                                disabled>
+                            🖨️ Print Shipping Label
+                        </button>
+
+                        <button id="printInvoiceBtn"
+                                class="nav-btn -outlined mb-3 w-100"
+                                disabled>
+                            📄 Print Invoice
+                        </button>
+
+                        <hr class="my-4">
+
+                        <a href="/dashboard" class="nav-btn w-100">
+                            📊 View Dashboard
+                        </a>
+
+                        <div id="statusMsg" class="text-muted mt-3"></div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const labelBtn   = document.getElementById("printLabelBtn");
+    const invoiceBtn = document.getElementById("printInvoiceBtn");
+    const statusMsg  = document.getElementById("statusMsg");
+
+    // 1️⃣ Get session data (from /cart)
+    fetch("/api/method/click2ship_core.api.call.session_data", {
+        credentials: "include"
+    })
+    .then(res => res.json())
+    .then(r => {
+        if (!r.message || !r.message.data || !r.message.data.shipment_id) {
+            statusMsg.innerText = "Shipment session not found.";
+            return;
+        }
+
+        const shipmentId = r.message.data.shipment_id;
+
+        // 2️⃣ Fetch Shipment Booking record
+        return fetch("/api/method/frappe.client.get", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Frappe-CSRF-Token": "{{ csrf_token }}"
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                doctype: "Shipment Booking",
+                name: shipmentId
+            })
+        });
+    })
+    .then(res => res.json())
+    .then(r => {
+        if (!r || !r.message) return;
+
+        const booking = r.message;
+
+        // Label
+        if (booking.label) {
+            labelBtn.disabled = false;
+            labelBtn.onclick = () => {
+                window.open(
+                    `/api/method/frappe.utils.file_manager.download_file?file_url=${booking.label}`,
+                    "_blank"
+                );
+            };
+        }
+
+        // Invoice
+        if (booking.invoice) {
+            invoiceBtn.disabled = false;
+            invoiceBtn.onclick = () => {
+                window.open(
+                    `/api/method/frappe.utils.file_manager.download_file?file_url=${booking.invoice}`,
+                    "_blank"
+                );
+            };
+        }
+
+        if (!booking.label && !booking.invoice) {
+            statusMsg.innerText = "Documents are still processing. Please refresh.";
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        statusMsg.innerText = "Failed to load shipment documents.";
+    });
+});
+</script>
+{% endblock %}
+

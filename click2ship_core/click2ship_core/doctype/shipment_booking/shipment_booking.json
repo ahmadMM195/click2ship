@@ -12,6 +12,7 @@
   "booking_type",
   "user",
   "column_break_gmwf",
+  "status",
   "shipment_booked_with",
   "shipping_service_name",
   "shipping_service_code",
@@ -47,22 +48,17 @@
   "items",
   "financial_details_section",
   "base_cost",
-  "fuel_cost",
-  "insurance_cost",
+  "total_cost_without_additional_cost",
+  "grand_total_including_additional_cost",
   "column_break_fgof",
   "air_freight_cost",
   "local_processing_cost",
   "local_custom_charges",
   "transhipping_clearance",
-  "section_break_qpwi",
-  "column_break_hlkq",
-  "total_cost_without_additional_cost",
-  "column_break_jhjd",
-  "total_extra_cost",
-  "section_break_djsi",
-  "column_break_awms",
-  "column_break_lane",
-  "grand_total_including_additional_cost"
+  "section_break_krte",
+  "response",
+  "label",
+  "invoice"
  ],
  "fields": [
   {
@@ -321,54 +317,34 @@
    "options": "Shipped Items"
   },
   {
-   "fieldname": "fuel_cost",
-   "fieldtype": "Data",
-   "label": "Fuel Cost",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "insurance_cost",
-   "fieldtype": "Data",
-   "label": "Insurance Cost",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_extra_cost",
-   "fieldtype": "Data",
-   "label": "Total Extra Cost",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_qpwi",
+   "fieldname": "section_break_krte",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_hlkq",
-   "fieldtype": "Column Break"
+   "fieldname": "response",
+   "fieldtype": "Text",
+   "label": "Response"
   },
   {
-   "fieldname": "column_break_jhjd",
-   "fieldtype": "Column Break"
+   "fieldname": "label",
+   "fieldtype": "Attach",
+   "label": "Label"
   },
   {
-   "fieldname": "section_break_djsi",
-   "fieldtype": "Section Break"
+   "fieldname": "invoice",
+   "fieldtype": "Attach",
+   "label": "Invoice"
   },
   {
-   "fieldname": "column_break_awms",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_lane",
-   "fieldtype": "Column Break"
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nDelivered\nCancelled"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-11 16:56:07.362062",
+ "modified": "2025-12-27 13:51:58.994918",
  "modified_by": "Administrator",
  "module": "Click2Ship Core",
  "name": "Shipment Booking",

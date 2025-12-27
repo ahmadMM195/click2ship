@@ -23,74 +23,153 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .then(res => res.json())
     .then(response => {
-        const allQuotes = response.message?.Quotes || [];
-        const currencyCode = response.message?.Currency || "USD";
-        console.log(currencyCode);
-        const currencySymbol = currencySymbols[currencyCode] || currencyCode;
+        console.log("************working*********************")
+        
+        if (response.message.route_type == 'Trucking'){
+		const allQuotes = response.message?.Quotes || [];
+		quoteResponse.innerHTML = "";
+                const currencySymbol = "PKR";
+		if (allQuotes.length === 0) {
+		    quoteResponse.innerText = "No quotes available.";
+		    return;
+		}
 
-        quoteResponse.innerHTML = "";
+		allQuotes.sort((a, b) => a.TotalCost - b.TotalCost);
 
-        if (allQuotes.length === 0) {
-            quoteResponse.innerText = "No quotes available.";
-            return;
+		allQuotes.forEach(q => {
+		    console.log(q)
+		    const quoteDiv = document.createElement("div");
+		    quoteDiv.classList.add("quote-wrapper");
+
+		    quoteDiv.innerHTML = `
+		        <div class="quote-item">
+		            <div class="flex-100">
+		                <img 
+		                    src="/assets/click2ship_core/courier_logos/${q.ServiceCode}.png"
+		                    alt="${q.ServiceName} Logo"
+		                    style="max-height: 60px;"
+		                    onerror="this.onerror=null; this.src='/assets/click2ship_core/courier_logos/C2S.png';"
+		                />
+		            </div>
+		            <div class="flex-200">
+		                <div class="quote-item-title">${q.ServiceName}</div>
+		                ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""}
+		            </div>
+		            <div class="flex-100">
+		                <div class="quote-item-title">${currencySymbol}${q.AdjustedTotalCost.toFixed(2)}</div>
+		                <div class="quote-item-desc">inclusive of VAT</div>
+		            </div>
+		            <div class="flex-200">
+		                <div class="quote-protection-cover">
+		                    <div class="quote-protection-tag">
+		                        <span class="quote-protection-inclusive">
+		                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48">
+		                                <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+		                                    <path d="M6 9.256L24.009 4L42 9.256v10.778A26.316 26.316 0 0 1 24.003 45A26.32 26.32 0 0 1 6 20.029z"></path>
+		                                    <path stroke-linecap="round" d="m15 23l7 7l12-12"></path>
+		                                </g>
+		                            </svg>
+		                            <span>Inc <strong>${currencySymbol}${q.Costs?.[2]?.TotalCost || ""}</strong> Protection</span>
+		                        </span>
+		                        <span class="quote-protection-upgrade">Standard Insurance</span>
+		                    </div>
+		                </div>
+		            </div>
+		            <div class="flex-150">
+		                <div class="quote-item-desc text-red">
+		                    Delivery expected by<br/>${q.PrettyTransitTime || "N/A"} (${q.TransitTime || "N/A"})
+		                </div>
+		            </div>
+		            <div class="flex-100">
+		                <!--<button type="button" class="nav-btn -outlined book-now-btn" data-quote='${JSON.stringify(q)}'>Book Now</button>-->
+		                <button type="button" class="nav-btn -outlined book-now-btn" data-quote='${JSON.stringify(q)}' >Book Now</button>
+		                
+		            </div>
+		        </div>
+		    `;
+
+		    quoteResponse.appendChild(quoteDiv);
+		});
+        
         }
+        else{
+        	const karrioResponse = response.message?.karrio_response.message.kario_payload || null;
+		console.log(karrioResponse)
+		const allQuotes = response.message?.Quotes || [];
+		const currencyCode = response.message?.Currency || "USD";
+		console.log(currencyCode);
+		const currencySymbol = currencySymbols[currencyCode] || currencyCode;
 
-        allQuotes.sort((a, b) => a.TotalCost - b.TotalCost);
+		quoteResponse.innerHTML = "";
 
-        allQuotes.forEach(q => {
-            q.CurrencyCode = currencyCode;
-            q.CurrencySymbol = currencySymbol;
+		if (allQuotes.length === 0) {
+		    quoteResponse.innerText = "No quotes available.";
+		    return;
+		}
 
-            const quoteDiv = document.createElement("div");
-            quoteDiv.classList.add("quote-wrapper");
+		allQuotes.sort((a, b) => a.TotalCost - b.TotalCost);
 
-            quoteDiv.innerHTML = `
-                <div class="quote-item">
-                    <div class="flex-100">
-                        <img 
-                            src="/assets/click2ship_core/courier_logos/${q.ServiceCode}.png"
-                            alt="${q.ServiceName} Logo"
-                            style="max-height: 60px;"
-                            onerror="this.onerror=null; this.src='/assets/click2ship_core/courier_logos/C2S.png';"
-                        />
-                    </div>
-                    <div class="flex-200">
-                        <div class="quote-item-title">${q.ServiceName}</div>
-                        ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""}
-                    </div>
-                    <div class="flex-100">
-                        <div class="quote-item-title">${currencySymbol}${q.AdjustedTotalCost.toFixed(2)}</div>
-                        <div class="quote-item-desc">inclusive of VAT</div>
-                    </div>
-                    <div class="flex-200">
-                        <div class="quote-protection-cover">
-                            <div class="quote-protection-tag">
-                                <span class="quote-protection-inclusive">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48">
-                                        <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
-                                            <path d="M6 9.256L24.009 4L42 9.256v10.778A26.316 26.316 0 0 1 24.003 45A26.32 26.32 0 0 1 6 20.029z"></path>
-                                            <path stroke-linecap="round" d="m15 23l7 7l12-12"></path>
-                                        </g>
-                                    </svg>
-                                    <span>Inc <strong>${currencySymbol}${q.Costs?.[2]?.TotalCost || ""}</strong> Protection</span>
-                                </span>
-                                <span class="quote-protection-upgrade">Standard Insurance</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex-150">
-                        <div class="quote-item-desc text-red">
-                            Delivery expected by<br/>${q.PrettyTransitTime || "N/A"} (${q.TransitTime || "N/A"})
-                        </div>
-                    </div>
-                    <div class="flex-100">
-                        <button type="button" class="nav-btn -outlined book-now-btn" data-quote='${JSON.stringify(q)}'>Book Now</button>
-                    </div>
-                </div>
-            `;
+		allQuotes.forEach(q => {
+		    q.CurrencyCode = currencyCode;
+		    q.CurrencySymbol = currencySymbol;
 
-            quoteResponse.appendChild(quoteDiv);
-        });
+		    const quoteDiv = document.createElement("div");
+		    quoteDiv.classList.add("quote-wrapper");
+
+		    quoteDiv.innerHTML = `
+		        <div class="quote-item">
+		            <div class="flex-100">
+		                <img 
+		                    src="/assets/click2ship_core/courier_logos/${q.ServiceCode}.png"
+		                    alt="${q.ServiceName} Logo"
+		                    style="max-height: 60px;"
+		                    onerror="this.onerror=null; this.src='/assets/click2ship_core/courier_logos/C2S.png';"
+		                />
+		            </div>
+		            <div class="flex-200">
+		                <div class="quote-item-title">${q.ServiceName}</div>
+		                ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""}
+		            </div>
+		            <div class="flex-100">
+		                <div class="quote-item-title">${currencySymbol}${q.AdjustedTotalCost.toFixed(2)}</div>
+		                <div class="quote-item-desc">inclusive of VAT</div>
+		            </div>
+		            <div class="flex-200">
+		                <div class="quote-protection-cover">
+		                    <div class="quote-protection-tag">
+		                        <span class="quote-protection-inclusive">
+		                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48">
+		                                <g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4">
+		                                    <path d="M6 9.256L24.009 4L42 9.256v10.778A26.316 26.316 0 0 1 24.003 45A26.32 26.32 0 0 1 6 20.029z"></path>
+		                                    <path stroke-linecap="round" d="m15 23l7 7l12-12"></path>
+		                                </g>
+		                            </svg>
+		                            <span>Inc <strong>${currencySymbol}${q.Costs?.[2]?.TotalCost || ""}</strong> Protection</span>
+		                        </span>
+		                        <span class="quote-protection-upgrade">Standard Insurance</span>
+		                    </div>
+		                </div>
+		            </div>
+		            <div class="flex-150">
+		                <div class="quote-item-desc text-red">
+		                    Delivery expected by<br/>${q.PrettyTransitTime || "N/A"} (${q.TransitTime || "N/A"})
+		                </div>
+		            </div>
+		            <div class="flex-100">
+		                <!--<button type="button" class="nav-btn -outlined book-now-btn" data-quote='${JSON.stringify(q)}'>Book Now</button>-->
+		                <button type="button" class="nav-btn -outlined book-now-btn" data-quote='${JSON.stringify(q)}' data-karrio='${JSON.stringify(karrioResponse)}'>
+	  Book Now
+	</button>
+		                
+		            </div>
+		        </div>
+		    `;
+
+		    quoteResponse.appendChild(quoteDiv);
+		});
+        }
+        
+        
     })
     .catch(err => {
         console.error("Fetch error:", err);
@@ -107,21 +186,22 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
             try {
                 const quote = JSON.parse(btn.dataset.quote);
-                bookNow(quote);
+        	 const karrio_response = JSON.parse(btn.dataset.karrio);
+                bookNow(quote, karrio_response);
             } catch (err) {
                 console.error("Invalid quote data", err);
             }
         }
     });
-
-    function bookNow(quote) {
+    
+    function bookNow(quote, karrio_response) {
         fetch("/api/method/click2ship_core.api.call.session_save", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-Frappe-CSRF-Token": csrfToken,
             },
-            body: JSON.stringify({ quote }),
+            body: JSON.stringify({ quote, karrio_response }),
             credentials: "include",
         })
             .then(res => res.json())

@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2025-12-17 16:25:39.431468",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "terms",
+  "mode",
+  "type",
+  "column_break_xdpr",
+  "from_location",
+  "to_location",
+  "empty_return",
+  "equipment",
+  "section_break_hnxd",
+  "rates"
+ ],
+ "fields": [
+  {
+   "fieldname": "terms",
+   "fieldtype": "Select",
+   "label": "Terms",
+   "options": "\nInter City\nIntra City"
+  },
+  {
+   "fieldname": "mode",
+   "fieldtype": "Select",
+   "label": "Mode",
+   "options": "\nImport\nReplanishment"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nPTW\nWTW"
+  },
+  {
+   "fieldname": "from_location",
+   "fieldtype": "Link",
+   "label": "From Location",
+   "options": "Trucking Location"
+  },
+  {
+   "fieldname": "to_location",
+   "fieldtype": "Link",
+   "label": "To Location",
+   "options": "Trucking Location"
+  },
+  {
+   "default": "0",
+   "fieldname": "empty_return",
+   "fieldtype": "Check",
+   "label": "Empty Return"
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "label": "Equipment",
+   "options": "Trucking Equipment"
+  },
+  {
+   "fieldname": "column_break_xdpr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_hnxd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "rates",
+   "fieldtype": "Table",
+   "label": "Rates",
+   "options": "Trucking Rate Detail"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-17 19:27:47.577580",
+ "modified_by": "Administrator",
+ "module": "Click2Ship Core",
+ "name": "Trucking Tariff",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -59,9 +59,12 @@ def rates():
         # Step 4: Send request
         response = requests.post(url, headers=headers, json=quote_data, timeout=30)
         response.raise_for_status()
-
+        response_data = response.json()
+        for quote in response_data.get("PricingResponseDetails", []):
+            quote['payload'] = quote_data
+            print("Added skynet_payload to quote:", quote_data)
         # Step 5: Return parsed response
-        return response.json()
+        return response_data
 
     except requests.exceptions.HTTPError as e:
         frappe.log_error("Skynet API HTTP Error (/rates)", f"{e}\nResponse: {getattr(response, 'text', None)}")

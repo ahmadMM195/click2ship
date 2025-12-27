@@ -2,9 +2,13 @@ import frappe, random, string
 from frappe.website.utils import is_signup_disabled
 from frappe import _
 from frappe.utils import escape_html
+from click2ship_core.api.call import session_data
 
 @frappe.whitelist(allow_guest=True)
 def guest_checkout(**kwargs):
+
+    session_key = frappe.session.sid
+    person_name = kwargs.get("rec_name")
     frappe.local.no_csrf = True  
 
     email = kwargs.get("Email")
@@ -28,7 +32,7 @@ def guest_checkout(**kwargs):
     user = frappe.get_doc({
         "doctype": "User",
         "email": email,
-        "first_name": escape_html("Guest"), # Added escape_html
+        "first_name": person_name, # Added escape_html
         "send_welcome_email": 0,
         "enabled": 1,
         "user_type": "Website User",
@@ -36,9 +40,23 @@ def guest_checkout(**kwargs):
     })
     user.insert(ignore_permissions=True)
 
+    customer = frappe.get_doc({
+        "doctype": "Customer",
+        "customer_name": person_name,
+        "customer_type": "Individual",   
+        "customer_group": "Individual",  
+        "territory": "Pakistan",
+        "email_id": email
+    })
+
+    customer.insert(ignore_permissions=True)
+    frappe.db.commit()
+
     # Log in as the new user, which starts a new session
     frappe.local.login_manager.authenticate(user=email, pwd=password)
     frappe.local.login_manager.post_login()
+
+
 
     # Restore the original session data to the new session
     if session_data:
@@ -50,7 +68,7 @@ def guest_checkout(**kwargs):
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def signup(email, first_name, last_name, password, redirect_to=None):
-    frappe.local.no_csrf = True
+    frappe.local.no_csrf = True 
 
     if is_signup_disabled():
         frappe.throw(_("Sign Up is disabled"), title=_("Not Allowed"))

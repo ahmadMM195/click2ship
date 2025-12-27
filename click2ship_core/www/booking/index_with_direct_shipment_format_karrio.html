@@ -873,179 +873,81 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
                 AddressCountryCode: shipperData.CountryCode
             }
         }];
-} else if (provider === 'Karrio') {
+    } else if (provider === 'Karrio') {
+        const total_weight = itemLines.flatMap(line => line.Products).reduce((total, p) => total + (p.ProductQuantity * p.ProductUnitWeight), 0) || 1;
 
-    // ---------- helpers ----------
-    const safeString = (val, fallback = "N/A") =>
-        val && String(val).trim() !== "" ? val : fallback;
+        const createAddress = (data, companyName = "N/A") => ({
+            postal_code: data.Zipcode,
+            city: data.City,
+            person_name: data.ContactName,
+            company_name: companyName,
+            country_code: data.CountryCode,
+            email: data.Email,
+            phone_number: data.PhoneNumber,
+            address_line1: data.Address1,
+            address_line2: data.Address2,
+            state_code: data.State || "",
+            federal_tax_id: "",
+            state_tax_id: "",
+            residential: false,
+            street_number: "",
+            validate_location: false
+        });
 
-    const rateId =
-        selected_quote.quote.id ||
-        selected_quote.quote.rate_id ||
-        selected_quote.quote.ServiceCode;
+        const parcelItems = itemLines.map(line => {
+            const product = line.Products[0];
+            return {
+                weight: product.ProductUnitWeight * product.ProductQuantity,
+                weight_unit: "KG",
+                description: product.ProductDescription,
+                quantity: product.ProductQuantity,
+                sku: product.sku || "",
+                hs_code: product.HSCode,
+                value_amount: product.ProductUnitValue,
+                value_currency: "USD",
+                origin_country: shipperData.CountryCode
+            };
+        });
 
-    // ---------- address mapper ----------
-    const createAddress = (data) => ({
-        postal_code: safeString(data.Zipcode),
-        city: safeString(data.City),
-        federal_tax_id: safeString("N/A"),
-        state_tax_id: safeString("N/A"),
-        person_name: safeString(data.ContactName),
-        company_name: safeString("N/A"),
-        country_code: safeString(data.CountryCode),
-        email: safeString(data.Email),
-        phone_number: safeString(data.PhoneNumber),
-        state_code: safeString(data.State || "N/A"),
-        residential: false,
-        street_number: safeString("N/A"),
-        address_line1: safeString(data.Address1),
-        address_line2: safeString(data.Address2),
-        validate_location: false
-    });
-
-    // ---------- items ----------
-    const parcelItems = itemLines.flatMap((line, idx) => {
-        return line.Products.map(p => ({
-            weight: p.ProductUnitWeight * p.ProductQuantity,
-            weight_unit: "KG",
-
-            title: safeString(p.ProductDescription),
-            description: safeString(p.ProductDescription),
-            quantity: p.ProductQuantity,
-
-            sku: safeString(p.sku),
-            hs_code: safeString(p.HSCode),
-
-            value_amount: p.ProductUnitValue,
-            value_currency: "USD",
-            origin_country: shipperData.CountryCode,
-
-            product_url: "https://click2ship.com",
-            image_url: "https://click2ship.com/image.png",
-            product_id: `PID-${idx + 1}`,
-            variant_id: `VAR-${idx + 1}`,
-            parent_id: `PAR-${idx + 1}`,
-
-            metadata: {
-                property1: null,
-                property2: null
-            }
-        }));
-    });
-
-    // ---------- parcel ----------
-    const parcel = {
-        weight: savedquote.quote_input?.boxweight || 1,
-        width: savedquote.quote_input?.boxwidth || 1,
-        height: savedquote.quote_input?.boxheight || 1,
-        length: savedquote.quote_input?.boxlength || 1,
-
-        packaging_type: "your_packaging",
-        package_preset: "custom_box",
-        description: "Shipment",
-        content: "Merchandise",
-
-        is_document: false,
-        weight_unit: "KG",
-        dimension_unit: "CM",
-
-        items: parcelItems,
-
-        reference_number: `REF-${Date.now()}`,
-        freight_class: "gen",
-        options: {}
-    };
-
-    // ---------- customs ----------
-    const customsCommodities = parcelItems.map(item => ({
-        weight: item.weight,
-        weight_unit: "KG",
-        title: item.title,
-        description: item.description,
-        quantity: item.quantity,
-        sku: item.sku,
-        hs_code: item.hs_code,
-        value_amount: item.value_amount,
-        value_currency: "USD",
-        origin_country: item.origin_country,
-
-        product_url: item.product_url,
-        image_url: item.image_url,
-        product_id: item.product_id,
-        variant_id: item.variant_id,
-        parent_id: item.parent_id,
-
-        metadata: {
-            property1: null,
-            property2: null
-        }
-    }));
-
-    // ---------- FINAL PAYLOAD ----------
-    payload = {
-        recipient: createAddress(deliveryData),
-        shipper: createAddress(shipperData),
-        return_address: createAddress(shipperData),
-        billing_address: createAddress(shipperData),
-
-        parcels: [parcel],
-
-        options: {},
-
-        payment: {
-            paid_by: "sender",
-            currency: "USD",
-            account_number: null
-        },
-
-        customs: {
-            commodities: customsCommodities,
-            duty: {
+        payload = {
+            recipient: createAddress(deliveryData),
+            shipper: createAddress(shipperData),
+            return_address: createAddress(shipperData),
+            billing_address: createAddress(shipperData),
+            parcels: [{
+                weight: total_weight,
+                width: 1,
+                height: 1,
+                length: 1,
+                length: savedquote.quote_input?.boxlength || 1,  
+                width: savedquote.quote_input?.boxwidth || 1,  
+                height: savedquote.quote_input?.boxheight || 1, 
+                weight_unit: "KG",
+                dimension_unit: "CM",
+                items: parcelItems,
+                is_document: false,
+                packaging_type: "your_packaging"
+            }],
+            payment: {
                 paid_by: "sender",
-                currency: "USD",
-                declared_value: parseFloat(document.getElementById('grand-total').textContent) || 0,
-                account_number: null
+                currency: "USD"
             },
-            duty_billing_address: createAddress(shipperData),
-            content_type: "merchandise",
-            content_description: "Merchandise",
-            incoterm: "CFR",
-            invoice: safeString("INV-" + Date.now()),
-            invoice_date: new Date().toISOString().split("T")[0],
-            commercial_invoice: true,
-            certify: true,
-            signer: safeString(shipperData.ContactName),
-            options: {}
-        },
-
-        reference: "Click2Ship",
-        label_type: "PDF",
-
-        selected_rate_id: rateId,
-
-        rates: [
-            {
-                id: rateId,
-                object_type: "rate",
-                carrier_name: selected_quote.quote.ServiceName,
-                carrier_id: "Karrio",
-                currency: selected_quote.quote.Currency || "USD",
-                service: selected_quote.quote.ServiceCode,
-                total_charge: selected_quote.quote.AdjustedTotalCost,
-                transit_days: selected_quote.quote.TransitTime,
-                extra_charges: [],
-                estimated_delivery: selected_quote.quote.PrettyTransitTime || "3 days",
-                meta: {
-                    property1: null,
-                    property2: null
+            customs: {
+                commodities: parcelItems,
+                duty: {
+                    paid_by: "sender",
+                    currency: "USD",
+                    declared_value: parseFloat(document.getElementById('grand-total').textContent) || 0,
                 },
-                test_mode: true
-            }
-        ]
-    };
-    
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    console.log(payload)
+                incoterm: "DDU", // Delivered Duty Unpaid
+                certify: true,
+                signer: shipperData.ContactName,
+                content_type: "merchandise"
+            },
+            service: selected_quote.quote.ServiceCode,
+            label_type: "PDF",
+            options: {}
+        };
     } else {
         // Default case or error handling
         // For now, let's assume the existing payload as default if provider is not matched.

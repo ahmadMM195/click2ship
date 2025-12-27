@@ -2,69 +2,163 @@ import frappe
 import json
 import concurrent.futures
 import requests
-
-
+from click2ship_core.api.trucking import get_trucking_quotes
 # -------------------------------------------------------------
 # Main Combined API Endpoint
 # -------------------------------------------------------------
 @frappe.whitelist(allow_guest=True)
 def rates():
-    """
-    Fetch shipping quotes from Norsk and Skynet APIs in parallel
-    using HTTP calls (thread-safe) and return a combined, normalized response.
-    """
     try:
-        # Step 1: Read frontend data
+        # -------------------------------
+        # 1️⃣ Read frontend payload
+        # -------------------------------
         raw_data = frappe.request.get_data(as_text=True)
         if not raw_data:
             frappe.throw("No quote input data received.")
-        quote_input = json.loads(raw_data)
 
-        # Step 2: Precompute base_url (must happen before threads)
+        quote_input = json.loads(raw_data)
+        route_type = quote_input.get("route_type")
         base_url = frappe.utils.get_url()
 
-        # Step 3: Parallel API calls
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future_norsk = executor.submit(
-                call_internal_api,
-                "click2ship_core.api.norsk_api.rates",
-                quote_input,
-                base_url
-            )
-            future_skynet = executor.submit(
-                call_internal_api,
-                "click2ship_core.api.skynet_api.rates",
-                quote_input,
-                base_url
-            )
-            future_karrio = executor.submit(
-                call_internal_api,
-                "click2ship_core.api.karrio_api.rates",
-                quote_input,
-                base_url
+        # -------------------------------
+        # 2️⃣ INTERNATIONAL ROUTES
+        # -------------------------------
+        if route_type in ("International", "uae", "uk"):
+
+            # City enrichment (shared)
+            city_name = quote_input.get("destinationcity", "")
+            if city_name:
+                city_doc = frappe.get_doc("City", city_name)
+                quote_input.update({
+                    "destinationZipcode": city_doc.postal_code,
+                    "state_code": city_doc.state_code,
+                    "destinationTown": city_name
+                })
+
+            # ---------------------------------
+            # ONLY KARRIO FOR INTERNATIONAL
+            # ---------------------------------
+            if route_type == "International": 
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                   
+                    future_karrio = executor.submit(
+                        call_internal_api,
+                        "click2ship_core.api.karrio_api.rates",
+                        quote_input,
+                        base_url
+                    )
+                    karrio_response = future_karrio.result()
+                karrio_quotes = normalize_quotes(karrio_response, "Karrio", route_type, quote_input)
+
+                return {
+                    "Quotes": karrio_quotes,
+                    "route_type": route_type,
+                    "karrio_response": karrio_response
+                }
+
+            # ---------------------------------
+            # ALL 3 FOR UAE / UK
+            # ---------------------------------
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future_norsk = executor.submit(
+                    call_internal_api,
+                    "click2ship_core.api.norsk_api.rates",
+                    quote_input,
+                    base_url
+                )
+                future_skynet = executor.submit(
+                    call_internal_api,
+                    "click2ship_core.api.skynet_api.rates",
+                    quote_input,
+                    base_url
+                )
+                future_karrio = executor.submit(
+                    call_internal_api,
+                    "click2ship_core.api.karrio_api.rates",
+                    quote_input,
+                    base_url
+                )
+
+                norsk_response = future_norsk.result()
+                skynet_response = future_skynet.result()
+                karrio_response = future_karrio.result()
+
+            norsk_quotes = normalize_quotes(norsk_response, "Norsk", route_type, quote_input)
+            skynet_quotes = normalize_quotes(skynet_response, "Skynet", route_type, quote_input)
+            karrio_quotes = normalize_quotes(karrio_response, "Karrio", route_type, quote_input)
+
+            return {
+                "Quotes": norsk_quotes + skynet_quotes + karrio_quotes,
+                "route_type": route_type,
+                "norsk_response": norsk_response,
+                "skynet_response": skynet_response,
+                "karrio_response": karrio_response
+            }
+
+        # -------------------------------
+        # 3️⃣ TRUCKING ROUTES
+        # -------------------------------
+        elif route_type == "Trucking":
+            print(")))))))))))))))))))))))))))))))))))")
+            print(quote_input)
+            trucking_response = get_trucking_quotes(
+                terms=quote_input.get("terms_val"),
+                mode=quote_input.get("mode_val"),
+                type_=quote_input.get("type_val"),
+                from_location=quote_input.get("from_val"),
+                to_location=quote_input.get("to_val"),
+                equipment=quote_input.get("equipment_val"),
+                empty_return=quote_input.get("empty_return", 0),
             )
 
-            norsk_response = future_norsk.result()
-            skynet_response = future_skynet.result()
-            karrio_response = future_karrio.result()
+            if trucking_response.get("status") != "success":
+                return {
+                    "Quotes": [],
+                    "route_type": "Trucking"
+                }
 
-        # Step 4: Normalize and merge
-        route_type = quote_input.get("route_type", "uk")  # 'uk' or 'uae'
-        norsk_quotes = normalize_quotes(norsk_response, "Norsk", route_type)
-        skynet_quotes = normalize_quotes(skynet_response, "Skynet", route_type)
-        karrio_quotes = normalize_quotes(karrio_response, "Karrio", route_type)
-        combined_quotes = norsk_quotes + skynet_quotes + karrio_quotes
+            quotes = []
+            for row in trucking_response["data"]:
+                tariff = row["tariff"]
+                for rate in row["rates"]:
+                    quotes.append({
+                        "Provider": "Trucking",
+                        "ServiceName": f'{tariff["equipment"]} - {rate["capacity"]}',
+                        "ServiceCode": tariff["equipment"].lower().replace(" ", "_"),
+                        "TransitTime": "N/A",
+                        "PrettyTransitTime": "N/A",
+                        "BaseCost": float(rate["rate"] or 0),
+                        "FuelCost": 0,
+                        "TotalCost": float(rate["rate"] or 0),
+                        "AdjustedTotalCost": float(rate["rate"] or 0),
+                        "Currency": "PKR",
+                        "Costs": [{
+                            "name": "Trucking Rate",
+                            "amount": float(rate["rate"] or 0),
+                            "currency": "PKR"
+                        }]
+                    })
+            print("::::::::::::::::::::::::::::::")
+            print(quotes)
+            return {
+                "Quotes": quotes,
+                "route_type": "Trucking"
+            }
 
-        # Step 5: Return unified response
+        # -------------------------------
+        # 4️⃣ INVALID ROUTE
+        # -------------------------------
         return {
-            "Quotes": combined_quotes,
-            "norsk_response": norsk_response,
-            "skynet_response": skynet_response,
-            "karrio_response": karrio_response
+            "Quotes": [],
+            "message": "Invalid route type"
         }
+
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "rates API Error")
-        frappe.throw(str(e))
+        frappe.log_error(frappe.get_traceback(), "Rates API Error")
+        return {
+            "Quotes": [],
+            "error": str(e)
+        }
 
 
 # -------------------------------------------------------------
@@ -94,7 +188,7 @@ def call_internal_api(api_path, quote_input, base_url):
 # -------------------------------------------------------------
 # Normalizer
 # -------------------------------------------------------------
-def normalize_quotes(raw_data, provider, via="uk"):
+def normalize_quotes(raw_data, provider, via = "uk", quote_input=None):
     quotes = []
     msg = raw_data.get("message", {})
 
@@ -136,6 +230,7 @@ def normalize_quotes(raw_data, provider, via="uk"):
             normalized = {
                 "Provider": provider,
                 "ServiceName": q.get("ServiceName"),
+                "payload": q.get("payload", {}),
                 "ServiceCode": q.get("ServiceCode"),
                 "TransitTime": q.get("TransitTime"),
                 "PrettyTransitTime": q.get("PrettyTransitTime"),
@@ -143,6 +238,7 @@ def normalize_quotes(raw_data, provider, via="uk"):
                 "BaseCost": q.get("BaseCost"),
                 "FuelCost": q.get("FuelCost"),
                 "TotalCost": q.get("TotalCost"),
+                "quote_input": quote_input,
                 "Currency": msg.get("Currency", "USD"),
                 "Costs": q.get("Costs", []),
             }
@@ -154,6 +250,7 @@ def normalize_quotes(raw_data, provider, via="uk"):
             normalized = {
                 "Provider": provider,
                 "ServiceName": "Skynet Express",
+                "payload": item.get("payload", {}),
                 "ServiceCode": item.get("ProductCode", "SKY"),
                 "TransitTime": item.get("TransitTime", "2–3 days"),
                 "PrettyTransitTime": item.get("PrettyTransitTime", "2–3 days"),
@@ -161,6 +258,7 @@ def normalize_quotes(raw_data, provider, via="uk"):
                 "BaseCost": item.get("BasicAmount", 0.0),
                 "FuelCost": item.get("FSAmount", 0.0),
                 "TotalCost": item.get("TotalAmount", 0.0),
+                "quote_input": quote_input,
                 "Currency": item.get("CurrencyCode", "USD"),
                 "Costs": [
                     {
@@ -188,6 +286,7 @@ def normalize_quotes(raw_data, provider, via="uk"):
 
             normalized = {
                 "Provider": provider,
+                "payload": rate.get("payload", {}),
                 "ServiceName": rate.get("meta", {}).get("service_name") or rate.get("service"),
                 "ServiceCode": rate.get("service"),
                 "TransitTime": rate.get("transit_days", None),
@@ -197,6 +296,7 @@ def normalize_quotes(raw_data, provider, via="uk"):
                 "FuelCost": fuel_charge,
                 "TotalCost": rate.get("total_charge", 0.0),
                 "Currency": rate.get("currency", "USD"),
+                "quote_input": quote_input,
                 "Costs": rate.get("extra_charges", []),
             }
             quotes.append(apply_extra_costs(normalized))
@@ -215,7 +315,8 @@ def get_first_mile_settings(via="uk"):
 
     # Normalize key prefix
     suffix = "_via_uk" if via.lower() == "uk" else "_via_uae"
-
+    if via.lower() not in ["uk", "uae"]:
+        suffix = via.lower()
     return {
         "air_freight_cost": settings.get(f"air_freight_cost{suffix}") or 0,
         "local_processing_cost": settings.get(f"local_processing_cost{suffix}") or 0,
@@ -226,34 +327,60 @@ def get_first_mile_settings(via="uk"):
 # -------------------------------------------------------------
 # Save data in the current user's server session
 # -------------------------------------------------------------
+import frappe
+import json
+
 @frappe.whitelist(allow_guest=True)
 def session_save():
     try:
-        # Get session data from cache or start with empty dict
+        # Use session ID as cache key
         session_key = frappe.session.sid
-        session_data = frappe.cache().get_value(f"session_data:{session_key}") or {}
+        cache_key = f"session_data:{session_key}"
 
-        # Get quote
+        # Load existing session data (if any)
+        session_data = frappe.cache().get_value(cache_key) or {}
+
+        # ---------------------------
+        # QUOTE
+        # ---------------------------
         quote = frappe.form_dict.get("quote")
         if quote:
             if isinstance(quote, str):
-                import json
                 quote = json.loads(quote)
             session_data["quote"] = quote
 
-        # Get booking payload
+        # ---------------------------
+        # BOOKING (optional / future)
+        # ---------------------------
         booking = frappe.form_dict.get("booking")
         if booking:
             if isinstance(booking, str):
-                import json
                 booking = json.loads(booking)
             session_data["booking"] = booking
 
+        # ---------------------------
+        # KARRIO RESPONSE (NEW)
+        # ---------------------------
+        karrio_response = frappe.form_dict.get("karrio_response")
+        if karrio_response:
+            if isinstance(karrio_response, str):
+                karrio_response = json.loads(karrio_response)
+            session_data["karrio_response"] = karrio_response
+
+        # ---------------------------
+        # VALIDATION
+        # ---------------------------
         if not session_data:
             frappe.throw("No session data received.")
 
-        # Store in cache using a unique key (e.g., session_id)
-        frappe.cache().set_value(f"session_data:{session_key}", session_data, expires_in_sec=3600)
+        # ---------------------------
+        # SAVE TO CACHE (1 hour)
+        # ---------------------------
+        frappe.cache().set_value(
+            cache_key,
+            session_data,
+            expires_in_sec=3600
+        )
 
         return {
             "status": "success",
@@ -263,7 +390,11 @@ def session_save():
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "session_save error")
-        return {"status": "error", "message": str(e)}
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
 
 
 # -------------------------------------------------------------

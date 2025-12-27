@@ -1,6 +1,11 @@
 {% extends "click2ship_core/templates/layout.html" %}
 
 {% block content %}
+<div id="cached-bookings"></div>
+<div id="rec-name"></div>
+
+
+
 <section id="cover">
     <div class="container">
         <div class="quote-header"><h2>Book Your Delivery</h2></div>
@@ -109,11 +114,38 @@
     </div>
 </section>
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+fetch("/api/method/click2ship_core.api.call.session_data", {
+        credentials: "include"
+    })
+    .then(res => res.json())
+    .then(result => {
+
+         const container = document.getElementById("cached-bookings");
+
+            if(result.message){
+                const data = result.message;
+                if(Object.keys(data).length === 0){
+                    container.innerHTML = "<p>No booking data in cache.</p>";
+                } else {
+                    var recipientName = data?.data?.booking?.shipper?.person_name || "";
+                    console.log(recipientName);
+                    
+                    $("#rec-name").html(recipientName)
+                    // container.innerHTML = recipientName;
+
+                    container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
+                }
+            }
+});
+});
+
+    
 
 /* LOGIN FORM */
 document.querySelector("#loginForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    const csrfToken = "{{ csrf_token }}";
+    const csrfToken = "{{ csrf_token }}"; 
     let form = e.target;
     let data = new FormData(form);
     for (let [k, v] of data.entries()) console.log(k, v); // debug
@@ -142,6 +174,11 @@ document.querySelector("#guestForm").addEventListener("submit", async function(e
     e.preventDefault();
     let form = e.target;
     let data = new FormData(form);
+    console.log("--",data);
+    
+    // data['rec_name'] =    $("#rec-name").html()
+    data.append('rec_name', $("#rec-name").html());
+
 
     try {
         let res = await fetch("/api/method/click2ship_core.api.identity_api.guest_checkout", {

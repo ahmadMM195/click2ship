@@ -2,51 +2,30 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:city_name",
- "creation": "2025-09-11 02:37:53.477604",
+ "autoname": "field:name1",
+ "creation": "2025-12-17 18:07:30.816056",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "city_name",
-  "country",
-  "postal_code",
-  "state_code"
+  "name1"
  ],
  "fields": [
   {
-   "fieldname": "city_name",
+   "fieldname": "name1",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "City Name",
+   "label": "Name",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "country",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Country",
-   "options": "Country",
-   "reqd": 1
-  },
-  {
-   "fieldname": "postal_code",
-   "fieldtype": "Data",
-   "label": "Postal Code"
-  },
-  {
-   "fieldname": "state_code",
-   "fieldtype": "Data",
-   "label": "State Code"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-23 13:39:14.181270",
+ "modified": "2025-12-17 18:08:07.451200",
  "modified_by": "Administrator",
  "module": "Click2Ship Core",
- "name": "City",
+ "name": "Trucking Capacity",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

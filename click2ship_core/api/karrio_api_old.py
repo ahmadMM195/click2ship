@@ -367,14 +367,10 @@ def rates():
                 title="Karrio API partial success",
                 message=f"Warnings: {data.get('messages')}"
             )
-        rates = data.get("rates", [])
-        for rate in rates:
-            rate['payload'] = payload
-            print("Added karrio_payload to rate:", payload)
+
         return {
             "success": True,
-            "kario_payload": payload,
-            "rates": rates,
+            "rates": data.get("rates", []),
             "messages": data.get("messages", [])
         }
 
@@ -409,7 +405,7 @@ def shipment():
     try:
         # Get the access token
         access_token = _get_valid_token()
-        url = f"{KARRIO_BASE_URL}/v1/proxy/shipping"
+        url = f"{KARRIO_BASE_URL}/v1/shipments"
         
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -420,142 +416,36 @@ def shipment():
 
         # Get data from the request
         shipment_data = frappe.request.get_json()
-        if (shipment_data.get("recipient",{})).get("state_code","") == "string":
-            shipment_data["recipient"]["state_code"] = ""
-        if (shipment_data.get("shipper",{})).get("state_code","") == "string":
-            shipment_data["shipper"]["state_code"] = ""
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#!!!!!!!!!!!!!!!!!")
-        # print(shipment_data)
-        
-        # shipment_data = {'recipient': {'postal_code': '10002', 'city': 'NEW YORK', 'person_name': 'Umer', 'company_name': 'N/A', 'country_code': 'US', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125595330', 'address_line1': 'test123', 'address_line2': '', 'state_code': 'NY', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'shipper': {'postal_code': '54000', 'city': 'Sialkot', 'person_name': 'Umer Farooq', 'company_name': 'N/A', 'country_code': 'PK', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125544332', 'address_line1': 'test', 'address_line2': '', 'state_code': '', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'return_address': {'postal_code': '54000', 'city': 'Sialkot', 'person_name': 'Umer Farooq', 'company_name': 'N/A', 'country_code': 'PK', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125544332', 'address_line1': 'test', 'address_line2': '', 'state_code': '', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'billing_address': {'postal_code': '54000', 'city': 'Sialkot', 'person_name': 'Umer Farooq', 'company_name': 'N/A', 'country_code': 'PK', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125544332', 'address_line1': 'test', 'address_line2': '', 'state_code': '', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'parcels': [{'weight': 1, 'width': 30, 'height': 30, 'length': 30, 'weight_unit': 'KG', 'dimension_unit': 'CM', 'items': [{'weight': 1, 'weight_unit': 'KG', 'description': 'test', 'quantity': 1, 'sku': '', 'hs_code': '00000000', 'value_amount': 503.26, 'value_currency': 'USD', 'origin_country': 'PK'}], 'is_document': False, 'packaging_type': 'your_packaging'}], 'payment': {'paid_by': 'sender', 'currency': 'USD'}, 'customs': {'commodities': [{'weight': 1, 'weight_unit': 'KG', 'description': 'test', 'quantity': 1, 'sku': '', 'hs_code': '00000000', 'value_amount': 503.26, 'value_currency': 'USD', 'origin_country': 'PK'}], 'duty': {'paid_by': 'sender', 'currency': 'USD', 'declared_value': 0}, 'incoterm': 'DDU', 'certify': True, 'signer': 'Umer Farooq', 'content_type': 'merchandise'}, 'service': 'ups_worldwide_express_plus', 'label_type': 'PDF', 'options': {}}
-        
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@Afterrrrrrrrrrrrrr#!!!!!!!!!!!!!!!!!")
-        print(shipment_data)
 
-
-        
         response = requests.post(url, json=shipment_data, headers=headers, timeout=15)
-    
+
         if response.status_code not in [200, 201]:
             frappe.throw(f"Shipment API Error {response.status_code}: {response.text}")
 
         # Parse the response JSON
         resp_json = response.json()
-        
-        print(response.status_code)
-        print(resp_json)
-        print("99999999999999999999999999999999999999999")
-        # import json
-        # import os
-
-        # # Path jahan file create karni hai
-        # path = "/home/adxaerp/frappe-bench/apps/click2ship_core/click2ship_core/api"
-        # file_path = os.path.join(path, "res.json")
-
-        # # response.json() ka data
-        # resp_json = response.json()
-
-        # # File write
-        # with open(file_path, "w", encoding="utf-8") as f:
-        #     json.dump(resp_json, f, ensure_ascii=False, indent=4)
-
-        print(resp_json.keys())
-        print(resp_json.get("recipient"))
-        print(resp_json.get("shipper"))
-
 
         # Extract fields
         barcode = resp_json.get("Barcode", {})
-        #label_base64 = resp_json.get("Label", {})
+        label_base64 = resp_json.get("Label", {})
 
         # Store into ERPNext Doctype
         doc = frappe.new_doc("Shipment Booking")
-
-        doc.shipping_service_name   =  "Karrio"
-        doc.shipment_barcode        =  resp_json.get("id", "")
-
-
-        doc.receiver_name           = resp_json.get("recipient", {}).get("person_name")
-        doc.receiver_country        = resp_json.get("recipient", {}).get("country_code")
-        doc.receiver_city           = resp_json.get("recipient", {}).get("city")
-        doc.receiver_state          = resp_json.get("recipient", {}).get("state_code")
-        doc.receiver_address1       = resp_json.get("recipient", {}).get("address_line1")
-        doc.receiver_address2       = resp_json.get("recipient", {}).get("address_line2")
-        doc.receiver_postal_code    = resp_json.get("recipient", {}).get("postal_code")
-        doc.receiver_email          = resp_json.get("recipient", {}).get("email")
-        doc.receiver_phone_number   = resp_json.get("recipient", {}).get("phone_number")
-
-
-        doc.shipper_name           = resp_json.get("shipper", {}).get("person_name")
-        doc.country_code           = resp_json.get("shipper", {}).get("country_code")
-        doc.shipper_city           = resp_json.get("shipper", {}).get("city")
-        doc.shipper_state          = resp_json.get("shipper", {}).get("state_code")
-        doc.shipper_address1       = resp_json.get("shipper", {}).get("address_line1")
-        doc.shipper_address2       = resp_json.get("shipper", {}).get("address_line2")
-        doc.shipper_postal_code    = resp_json.get("shipper", {}).get("postal_code")
-        doc.shipper_email          = resp_json.get("shipper", {}).get("email")
-        doc.shipper_phone_number   = resp_json.get("shipper", {}).get("phone_number")
-        
-        #documents = resp_json.get("shipping_documents")
-        #doc.response   = resp_json.pop("shipping_documents")
-        
-        
-        #doc.response = json.dumps(resp_json.get("shipping_documents"), indent=2)
-        
-        # doc.shipment_barcode = barcode
+        doc.shipment_barcode = barcode
         doc.user = frappe.session.user
-        
-        items_table = resp_json.get("parcels", []).get("items", [])
-        for items in items_table:
-            doc.append('items', {
-                'item_name': "Karrio",
-                'item_description': items.description,
-                'quantity': items.quantity,
-                'item_value': items.value_amount
-            })
-        
         doc.insert(ignore_permissions=True)
         
-        documents = resp_json.get("shipping_documents", [])
-        
-        for doc_item in documents:
-            category = doc_item.get("category")
-            base64_data = doc_item.get("base64")
-            
-            if not base64_data:
-                continue
-            file_name = ""
-            field_name = ""
-            
-            if category == "label":
-                file_name = f"Shipment_Label_{resp_json.get('id', '')}.pdf"
-                field_name = "label"
-            elif category == "invoice":
-                file_name = f"Shipment_Invoice_{resp_json.get('id', '')}.pdf"
-                field_name = "invoice"
-            else:
-                continue
-                
-            file_doc = frappe.get_doc({
-                "doctype": "File",
-                "file_name": file_name,
-                "attached_to_name": doc.name,
-                "attached_to_doctype": "Shipment Booking",
-                "attached_to_field": field_name,
-                "is_private": 1,
-                "content": base64.b64decode(base64_data)  # ✅ CORRECT
-            })
-            
-            file_doc.insert(ignore_permissions=True)
-            if file_doc.name:
-                frappe.db.set_value("Shipment Booking", doc.name, field_name, file_doc.file_url)
-            
-            #frappe.db.sql("Shipment Booking", {"invoice": file_doc.name})
+        file_name = f"Shipment_Label_{barcode}.pdf"
+        file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "attached_to_doctype": "Shipment Booking",
+            "attached_to_name": doc.name,   # Link to THIS booking record
+            "is_private": 1,
+            "content": base64.b64decode(label_base64)  # decode PDF
+        })
+        file_doc.insert(ignore_permissions=True)
 
-
-
-        
-        print("-------------")
         return {
             "success": True,
             "shipment_id": doc.name,

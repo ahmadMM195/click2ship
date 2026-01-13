@@ -178,6 +178,18 @@
                 <div class="modal-body">
                     <form id="signup-form">
                         <div class="form-group mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="signup-user-type">
+                                        <option value="Normal" selected>Normal</option>
+                                        <option value="Corporate">Corporate</option>
+                                        <option value="Merchant">Merchant</option>
+                                        <option value="Reseller">Reseller</option>
+                                    </select>
+                                    <label for="signup-user-type">Sign up as</label>
+                                </div>
+                            </div>
+
+                        <div class="form-group mb-3">
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="signup-first-name" placeholder="First Name">
                                 <label for="signup-first-name">First Name</label>
@@ -278,7 +290,8 @@
             if(signupForm) {
                 signupForm.addEventListener("submit", function(event) {
                     event.preventDefault();
-                    
+
+                    const userTypeInput = document.getElementById("signup-user-type");
                     const firstNameInput = document.getElementById("signup-first-name");
                     const lastNameInput = document.getElementById("signup-last-name");
                     const emailInput = document.getElementById("signup-email");
@@ -294,12 +307,17 @@
                     confirmPasswordInput.classList.remove('is-invalid');
                     signupError.textContent = "";
 
+                    const userType = userTypeInput.value.trim();
                     const firstName = firstNameInput.value.trim();
                     const lastName = lastNameInput.value.trim();
                     const email = emailInput.value.trim();
                     const password = passwordInput.value.trim();
                     const confirmPassword = confirmPasswordInput.value.trim();
 
+                    if (userType === "") {
+                        userTypeInput.classList.add('is-invalid');
+                        return;
+                    }
                     if (firstName === "") {
                         firstNameInput.classList.add('is-invalid');
                         return;
@@ -331,6 +349,7 @@
                             "Accept": "application/json"
                         },
                         body: JSON.stringify({
+                            user_type: userType,
                             first_name: firstName,
                             last_name: lastName,
                             email: email,

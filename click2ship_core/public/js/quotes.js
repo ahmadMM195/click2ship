@@ -24,8 +24,11 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(res => res.json())
     .then(response => {
         console.log("************working*********************")
+        console.log("-- Fetch response:", response);
+
         
         if (response.message.route_type == 'Trucking'){
+			console.log("ifff")
 		const allQuotes = response.message?.Quotes || [];
 		quoteResponse.innerHTML = "";
                 const currencySymbol = "PKR";
@@ -53,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		            </div>
 		            <div class="flex-200">
 		                <div class="quote-item-title">${q.ServiceName}</div>
-		                ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""}
+		                <!-- ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""} -->
 		            </div>
 		            <div class="flex-100">
 		                <div class="quote-item-title">${currencySymbol}${q.AdjustedTotalCost.toFixed(2)}</div>
@@ -93,9 +96,11 @@ document.addEventListener("DOMContentLoaded", function () {
         
         }
         else{
+		console.log("elseee")
         	const karrioResponse = response.message?.karrio_response.message.kario_payload || null;
 		console.log(karrioResponse)
-		const allQuotes = response.message?.Quotes || [];
+		rates = response.message?.karrio_response.message.rates || [];
+		let allQuotes = response.message?.Quotes || [];
 		const currencyCode = response.message?.Currency || "USD";
 		console.log(currencyCode);
 		const currencySymbol = currencySymbols[currencyCode] || currencyCode;
@@ -128,7 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		            </div>
 		            <div class="flex-200">
 		                <div class="quote-item-title">${q.ServiceName}</div>
-		                ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""}
+		               <!--  ${q.Costs?.[1] ? `<div class="quote-item-desc">${q.Costs[1].Reference}</div>` : ""} -->
 		            </div>
 		            <div class="flex-100">
 		                <div class="quote-item-title">${currencySymbol}${q.AdjustedTotalCost.toFixed(2)}</div>

@@ -46,7 +46,9 @@ def guest_checkout(**kwargs):
         "customer_type": "Individual",   
         "customer_group": "Individual",  
         "territory": "Pakistan",
-        "email_id": email
+        "email_id": email,
+        "custom_user": user.name,
+        "custom_customer_type": "Normal"
     })
 
     customer.insert(ignore_permissions=True)
@@ -67,7 +69,7 @@ def guest_checkout(**kwargs):
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
-def signup(email, first_name, last_name, password, redirect_to=None):
+def signup(user_type,email, first_name, last_name, password, redirect_to=None):
     frappe.local.no_csrf = True 
 
     if is_signup_disabled():
@@ -107,10 +109,25 @@ def signup(email, first_name, last_name, password, redirect_to=None):
     user.flags.ignore_password_policy = True
     user.insert()
 
+
     # set default signup role as per Portal Settings
     default_role = frappe.get_single_value("Portal Settings", "default_role")
     if default_role:
         user.add_roles(default_role)
+    
+    customer = frappe.get_doc({
+        "doctype": "Customer",
+        "customer_name": user.full_name,
+        "customer_type": "Individual",   
+        "customer_group": "Individual",  
+        "territory": "Pakistan",
+        "email_id": email,
+        "custom_user": user.name,
+        "custom_customer_type": user_type
+    })
+
+    customer.insert(ignore_permissions=True)
+    frappe.db.commit()
 
     if redirect_to:
         frappe.cache.hset("redirect_after_login", user.name, redirect_to)

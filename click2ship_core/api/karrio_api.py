@@ -133,111 +133,125 @@ def rates():
     # -----------------------------------------------
     # STEP 2 — Build payload (you can map quote_input later)
     # -----------------------------------------------
-    # payload = {
-    #     # "shipper": {
-    #     #     "postal_code": "SW1A1AA",
-    #     #     "country_code": "GB"
-    #     # },
-    #     # "recipient": {
-    #     #     "postal_code": "4008",
-    #     #     "country_code": "AU"
-    #     # },
-    #      "shipper": {
-    #         "address": {
-    #             "country_code": "PK"
-    #         }
-    #     },
-    #     "recipient": {
-    #         "address": {
-    #             "country_code": quote_input.get("destinationCountry","GB")
-    #         }
-    #     },
-    #     "parcels": [
-    #         {
-    #             # "weight": 2,
-    #             # "width": 1,
-    #             # "height": 1,
-    #             # "length": 1,
-    #             "Length": float(quote_input.get("boxlength", 1)),
-    #             "Width": float(quote_input.get("boxwidth", 1)),
-    #             "Height": float(quote_input.get("boxheight", 1)),
-    #             "Weight": float(quote_input.get("boxweight", 1)), 
-    #             "weight_unit": "KG",
-    #             "dimension_unit": "CM",
-    #             "items": [
-    #                 {
-    #                     "Weight": float(quote_input.get("boxweight", 1)),  
-    #                     "weight_unit": "KG",
-    #                     "value_amount": 25.00,
-    #                     "value_currency": "USD",
-    #                     "origin_country": "GB",
-    #                 }
-    #                 # {
-    #                 #     "weight": 1,
-    #                 #     "weight_unit": "KG",
-    #                 #     "value_amount": 25.00,
-    #                 #     "value_currency": "USD",
-    #                 #     "origin_country": "GB",
-    #                 # },
-    #                 # {
-    #                 #     "weight": 1,
-    #                 #     "weight_unit": "KG",
-    #                 #     "value_amount": 15.00,
-    #                 #     "value_currency": "USD",
-    #                 #     "origin_country": "GB",
-    #                 # },
-    #             ],
-    #             "reference_number": "INV-1001",
-    #             "options": {},
-    #         }
-    #     ],
-    #     "services": [],
-    #     "options": {
-    #         "currency": "USD",
-    #         "insurance": 10.00,
-    #         "dangerous_good": False,
-    #         "declared_value": 50.00,
-    #     },
-    #     "reference": "TEST-FEDEX-GB-US",
-    # }
+    '''payload = {
+          "shipper": {
+              "postal_code": "SW1A1AA",
+              "country_code": "GB"
+          },
+         "recipient": {
+             "postal_code": "4008",
+              "country_code": "AU"
+          },
+          "shipper": {
+             "address": {
+                 "country_code": "PK"
+             }
+         },
+         "recipient": {
+             "address": {
+                "country_code": quote_input.get("destinationCountry","GB")
+             }
+         },
+         "parcels": [
+             {
+                 "weight": 2,
+                 "width": 1,
+                 "height": 1,
+                 "length": 1,
+                 "Length": float(quote_input.get("boxlength", 1)),
+                 "Width": float(quote_input.get("boxwidth", 1)),
+                 "Height": float(quote_input.get("boxheight", 1)),
+                 "Weight": float(quote_input.get("boxweight", 1)), 
+                 "weight_unit": "KG",
+                 "dimension_unit": "CM",
+                 "items": [
+                  {
+                         "Weight": float(quote_input.get("boxweight", 1)),  
+                         "weight_unit": "KG",
+                         "value_amount": 25.00,
+                         "value_currency": "USD",
+                        "origin_country": "GB",
+                   },
+                   {
+                          "weight": 1,
+                          "weight_unit": "KG",
+                          "value_amount": 25.00,
+                          "value_currency": "USD",
+                          "origin_country": "GB",
+                    },
+                    {
+                        "weight": 1,
+                        "weight_unit": "KG",
+                         "value_amount": 15.00,
+                          "value_currency": "USD",
+                         "origin_country": "GB",
+                     }
+                 ],
+                 "reference_number": "INV-1001",
+                 "options": {},
+             }
+         ],
+         "services": [],
+         "options": {
+             "currency": "USD",
+             "insurance": 10.00,
+             "dangerous_good": False,
+             "declared_value": 50.00,
+         },
+         "reference": "TEST-FEDEX-GB-US",
+    }'''
     #route_type = quote_input.get("intdestinationCountry")
     #destination_country = quote_input.get("intdestinationCountry", 1)
     
-    print("#############")
+    print("#############112233221111232111")
     print(quote_input)
+    
+    post_code  = "SW1A1AA"
+    count_code = "GB"
+    city_ = "London"
+    state_code_ = ""
+    
+    if quote_input.get("route_type", "") == 'International':
+        post_code  = "54000"
+        count_code = "PK"
+        city_       =  "Sialkot"
+        state_code_  = ""
+    print(post_code)
+    print(count_code)
+    print(state_code_)
     payload = {
         "shipper": {            
-            "postal_code": "54000",
-            "city": "Sialkot",
-            "federal_tax_id": "string",
-            "state_tax_id": "string",
-            "person_name": "string",
-            "company_name": "string",
-            "country_code": "PK",
-            "email": "string",
+            "postal_code": post_code,
+            "city": city_,
+            "federal_tax_id": "",
+            "state_tax_id": "",
+            "person_name": "",
+            "company_name": "",
+            "country_code": count_code,
+            "email": "",
             "phone_number": "",
-            "state_code": "string",
+            "state_code": state_code_,
             "residential": False,
-            "street_number": "string",
-            "address_line1": "string",
-            "address_line2": "string",
+            "street_number": "",
+            "address_line1": "String",
+            "address_line2": "",
             "validate_location": False
         },
         "recipient": {
             "postal_code": quote_input.get("destinationZipcode", "12345"),
             "city": quote_input.get("destinationTown", "New"),
-            "federal_tax_id": "string",
-            "state_tax_id": "string",
-            "person_name": "string",
-            "company_name": "string",
+            "federal_tax_id": "",
+            "state_tax_id": "",
+            "person_name": "",
+            "company_name": "",
             "country_code": quote_input.get("destinationCountry",""),
-            "email": "string",
+            "email": "",
             "phone_number": "",
             "state_code": quote_input.get("state_code", ""),
             "residential": False,
-            "street_number": "string",
-            "address_line1": "string",
-            "address_line2": "string",
+            "street_number": "",
+            "address_line1": "String",
+            "address_line2": "",
             "validate_location": False
             
         },
@@ -247,10 +261,10 @@ def rates():
                 "width": float(quote_input.get("boxwidth", 1)),
                 "height": float(quote_input.get("boxheight", 1)),
                 "length": float(quote_input.get("boxlength", 1)),
-                "packaging_type": "string",
-                "package_preset": "string",
-                "description": "string",
-                "content": "string",
+                "packaging_type": "",
+                "package_preset": "",
+                "description": "",
+                "content": "",
                 "is_document": False,
                 "weight_unit": "KG",
                 "dimension_unit": "CM",
@@ -258,34 +272,36 @@ def rates():
                     {
                         "weight": float(quote_input.get("boxweight", 1)),
                         "weight_unit": "KG",
-                        "title": "string",
-                        "description": "string",
+                        "title": "",
+                        "description": "",
                         "quantity": 1,
-                        "sku": "string",
-                        "hs_code": "string",
-                        "value_amount": 25,
+                        "sku": "",
+                        "hs_code": "",
+                        "value_amount": 0,
                         "value_currency": "USD",
-                        "origin_country": "PK",
-                        "product_url": "string",
-                        "image_url": "string",
-                        "product_id": "string",
-                        "variant_id": "string",
-                        "parent_id": "string",
+                        "origin_country": count_code,
+                        "product_url": "https://click2ship.com",
+                        "image_url": "https://click2ship.com/image.png",
+                        "product_id": "PID",
+                        "variant_id": "VAR",
+                        "parent_id": "PAR",
                         "metadata": {
                             "property1": None,
                             "property2": None
                         }
                     }                
                 ],
-                "reference_number": "string",
-                "freight_class": "string",
+                "reference_number": "REF",
+                "freight_class": "gen",
                 "options": {}
             }
             
             
         ],
         "services": [],
-        "options": {},
+        "options": {
+             "currency": "USD"
+         },
         "reference": "string",
         "carrier_ids": []
     }
@@ -333,7 +349,7 @@ def rates():
     # STEP 3 — Send request to Karrio
     # -----------------------------------------------
     
-    print("###################")
+    print("#######Karrio payload############")
     print(payload)
     access_token = _get_valid_token()
     url = f"{KARRIO_BASE_URL}/v1/proxy/rates"
@@ -346,6 +362,7 @@ def rates():
 
     try:
         response = requests.post(url, json=payload, headers=headers, timeout=15)
+        # frappe.error_log(response.json())
 
     except requests.exceptions.RequestException as e:
         # Network error, timeout → return clean error
@@ -360,6 +377,10 @@ def rates():
     # -----------------------------------------------
     if response.status_code in [200, 207]:
         data = response.json()
+        print("\n\n-----------------------")
+        print(data)
+        print("-----------------------\n\n")
+
 
         # Log partial success warnings quietly
         if response.status_code == 207:
@@ -368,9 +389,11 @@ def rates():
                 message=f"Warnings: {data.get('messages')}"
             )
         rates = data.get("rates", [])
+        print("before", payload)
+
         for rate in rates:
             rate['payload'] = payload
-            print("Added karrio_payload to rate:", payload)
+        print("Added karrio_payload to rate:", payload)
         return {
             "success": True,
             "kario_payload": payload,
@@ -420,17 +443,21 @@ def shipment():
 
         # Get data from the request
         shipment_data = frappe.request.get_json()
+
+
+        
         if (shipment_data.get("recipient",{})).get("state_code","") == "string":
             shipment_data["recipient"]["state_code"] = ""
         if (shipment_data.get("shipper",{})).get("state_code","") == "string":
             shipment_data["shipper"]["state_code"] = ""
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#!!!!!!!!!!!!!!!!!")
-        # print(shipment_data)
-        
-        # shipment_data = {'recipient': {'postal_code': '10002', 'city': 'NEW YORK', 'person_name': 'Umer', 'company_name': 'N/A', 'country_code': 'US', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125595330', 'address_line1': 'test123', 'address_line2': '', 'state_code': 'NY', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'shipper': {'postal_code': '54000', 'city': 'Sialkot', 'person_name': 'Umer Farooq', 'company_name': 'N/A', 'country_code': 'PK', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125544332', 'address_line1': 'test', 'address_line2': '', 'state_code': '', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'return_address': {'postal_code': '54000', 'city': 'Sialkot', 'person_name': 'Umer Farooq', 'company_name': 'N/A', 'country_code': 'PK', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125544332', 'address_line1': 'test', 'address_line2': '', 'state_code': '', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'billing_address': {'postal_code': '54000', 'city': 'Sialkot', 'person_name': 'Umer Farooq', 'company_name': 'N/A', 'country_code': 'PK', 'email': 'farooqx2560@gmail.com', 'phone_number': '03125544332', 'address_line1': 'test', 'address_line2': '', 'state_code': '', 'federal_tax_id': '', 'state_tax_id': '', 'residential': False, 'street_number': '', 'validate_location': False}, 'parcels': [{'weight': 1, 'width': 30, 'height': 30, 'length': 30, 'weight_unit': 'KG', 'dimension_unit': 'CM', 'items': [{'weight': 1, 'weight_unit': 'KG', 'description': 'test', 'quantity': 1, 'sku': '', 'hs_code': '00000000', 'value_amount': 503.26, 'value_currency': 'USD', 'origin_country': 'PK'}], 'is_document': False, 'packaging_type': 'your_packaging'}], 'payment': {'paid_by': 'sender', 'currency': 'USD'}, 'customs': {'commodities': [{'weight': 1, 'weight_unit': 'KG', 'description': 'test', 'quantity': 1, 'sku': '', 'hs_code': '00000000', 'value_amount': 503.26, 'value_currency': 'USD', 'origin_country': 'PK'}], 'duty': {'paid_by': 'sender', 'currency': 'USD', 'declared_value': 0}, 'incoterm': 'DDU', 'certify': True, 'signer': 'Umer Farooq', 'content_type': 'merchandise'}, 'service': 'ups_worldwide_express_plus', 'label_type': 'PDF', 'options': {}}
-        
+        # shipment_data["recipient"]["state_code"] = "NY"
+        # shipment_data["recipient"]["shipper"] = ""
+        # shipment_data["recipient"]["return_address"] = ""
+
+
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@Afterrrrrrrrrrrrrr#!!!!!!!!!!!!!!!!!")
         print(shipment_data)
+
 
 
         
@@ -441,32 +468,11 @@ def shipment():
 
         # Parse the response JSON
         resp_json = response.json()
-        
-        print(response.status_code)
-        print(resp_json)
-        print("99999999999999999999999999999999999999999")
-        # import json
-        # import os
-
-        # # Path jahan file create karni hai
-        # path = "/home/adxaerp/frappe-bench/apps/click2ship_core/click2ship_core/api"
-        # file_path = os.path.join(path, "res.json")
-
-        # # response.json() ka data
-        # resp_json = response.json()
-
-        # # File write
-        # with open(file_path, "w", encoding="utf-8") as f:
-        #     json.dump(resp_json, f, ensure_ascii=False, indent=4)
-
-        print(resp_json.keys())
-        print(resp_json.get("recipient"))
-        print(resp_json.get("shipper"))
 
 
+        doc_url = {}
         # Extract fields
         barcode = resp_json.get("Barcode", {})
-        #label_base64 = resp_json.get("Label", {})
 
         # Store into ERPNext Doctype
         doc = frappe.new_doc("Shipment Booking")
@@ -496,31 +502,37 @@ def shipment():
         doc.shipper_email          = resp_json.get("shipper", {}).get("email")
         doc.shipper_phone_number   = resp_json.get("shipper", {}).get("phone_number")
         
-        #documents = resp_json.get("shipping_documents")
-        #doc.response   = resp_json.pop("shipping_documents")
-        
-        
-        #doc.response = json.dumps(resp_json.get("shipping_documents"), indent=2)
-        
+        documents = resp_json.get("docs", {})
+        resp_json.pop("docs")
+
+
+
+        doc.response = json.dumps(resp_json, indent=2)
+
         # doc.shipment_barcode = barcode
         doc.user = frappe.session.user
         
-        items_table = resp_json.get("parcels", []).get("items", [])
-        for items in items_table:
-            doc.append('items', {
-                'item_name': "Karrio",
-                'item_description': items.description,
-                'quantity': items.quantity,
-                'item_value': items.value_amount
-            })
+        # items_table = resp_json.get("parcels", {}).get("items", [])
+        for row in resp_json.get("parcels", []):
+            for items in row.get("items", []):
+                doc.append('items', {
+                    'item_name': "Karrio",
+                    # 'item_description': items.description,
+                    'quantity': items.get("quantity"),
+                    'item_value': items.get("value_amount"),
+                    'item_hscode': items.get("hs_code"),
+                    'item_currency': items.get("value_currency"),
+                    'item_weight': items.get("weight")
+                })
         
         doc.insert(ignore_permissions=True)
         
-        documents = resp_json.get("shipping_documents", [])
         
-        for doc_item in documents:
-            category = doc_item.get("category")
-            base64_data = doc_item.get("base64")
+
+        
+        # for doc_item in documents:
+        for category in ("label", "invoice"):
+            base64_data = documents.get(category, "")
             
             if not base64_data:
                 continue
@@ -549,19 +561,15 @@ def shipment():
             file_doc.insert(ignore_permissions=True)
             if file_doc.name:
                 frappe.db.set_value("Shipment Booking", doc.name, field_name, file_doc.file_url)
-            
-            #frappe.db.sql("Shipment Booking", {"invoice": file_doc.name})
+                doc_url[category] = file_doc.file_url
 
-
-
-        
-        print("-------------")
-        return {
-            "success": True,
+        return_data = {}
+        return_data["shipment_details"] = {
             "shipment_id": doc.name,
             "barcode": barcode,
-            "label_url": file_doc.file_url   # ERPNext file URL
+            "doc_url": doc_url
         }
+        return return_data
 
     except requests.exceptions.RequestException as req_err:
         frappe.log_error(frappe.get_traceback(), "Karrio Shipment API Request Error")
@@ -570,3 +578,322 @@ def shipment():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Unexpected Error in Shipment Booking")
         frappe.throw(f"An unexpected error occurred during shipment booking: {str(e)}")
+        
+
+@frappe.whitelist(allow_guest=True)
+def schedule_proxy_pickup():
+    """
+    Schedule pickup using Karrio Proxy Pickup API
+    Based strictly on /success session_data structure
+    """
+
+    try:
+        # ------------------------------------
+        # 1️⃣ Auth & headers
+        # ------------------------------------
+        access_token = _get_valid_token()
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "x-test-mode": "true"
+        }
+
+        # ------------------------------------
+        # 2️⃣ Read session data
+        # ------------------------------------
+        session_key = frappe.session.sid
+        session_data = frappe.cache().get_value(f"session_data:{session_key}") or {}
+
+        data = session_data.get("data", {})
+        print("Dataaaaaaaaaaaaaaaaaaaaaaaa")
+        print(data)
+        shipment_data = frappe.request.get_json()
+        print("shipment_dataaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        print(shipment_data)
+
+        booking = data.get("booking")
+        if not booking:
+            frappe.throw("Booking payload not found in session.")
+
+        shipper = booking.get("shipper")
+        parcels = booking.get("parcels", [])
+
+        if not shipper or not parcels:
+            frappe.throw("Shipper or parcels missing in booking data.")
+
+        # ------------------------------------
+        # 3️⃣ Carrier name (VERY IMPORTANT)
+        # ------------------------------------
+        rates = booking.get("rates", [])
+        if not rates:
+            frappe.throw("Carrier rate information missing.")
+
+        carrier_name = rates[0].get("carrier_name")
+        if not carrier_name:
+            frappe.throw("Carrier name missing for pickup.")
+
+        # ------------------------------------
+        # 4️⃣ Pickup date & timing
+        # ------------------------------------
+        pickup_date = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
+
+        ready_time = "10:00"
+        closing_time = "18:00"
+
+        # ------------------------------------
+        # 5️⃣ Build pickup payload (STRICT)
+        # ------------------------------------
+        pickup_payload = {
+            "pickup_date": pickup_date,
+            "address": {
+                "postal_code": shipper.get("postal_code"),
+                "city": shipper.get("city"),
+                "federal_tax_id": shipper.get("federal_tax_id", ""),
+                "state_tax_id": shipper.get("state_tax_id", ""),
+                "person_name": shipper.get("person_name"),
+                "company_name": shipper.get("company_name", "N/A"),
+                "country_code": shipper.get("country_code"),
+                "email": shipper.get("email"),
+                "phone_number": shipper.get("phone_number"),
+                "state_code": shipper.get("state_code", ""),
+                "residential": shipper.get("residential", False),
+                "street_number": shipper.get("street_number", ""),
+                "address_line1": shipper.get("address_line1"),
+                "address_line2": shipper.get("address_line2", ""),
+                "validate_location": False
+            },
+            "parcels": parcels,
+            "ready_time": ready_time,
+            "closing_time": closing_time,
+            "instruction": "Pickup scheduled via Click2Ship",
+            "package_location": "Reception",
+            "options": {}
+        }
+
+        # ------------------------------------
+        # 6️⃣ Call Karrio Proxy Pickup API
+        # ------------------------------------
+        pickup_url = f"{KARRIO_BASE_URL}/v1/proxy/pickups/{carrier_name}"
+
+        response = requests.post(
+            pickup_url,
+            json=pickup_payload,
+            headers=headers,
+            timeout=20
+        )
+
+        if response.status_code not in (200, 201):
+            frappe.throw(
+                f"Pickup API Error {response.status_code}: {response.text}"
+            )
+
+        pickup_response = response.json()
+
+        # ------------------------------------
+        # 7️⃣ Save pickup result back to session
+        # ------------------------------------
+        data["pickup_details"] = pickup_response
+        session_data["data"] = data
+
+        frappe.cache().set_value(
+            f"session_data:{session_key}",
+            session_data,
+            expires_in_sec=3600
+        )
+
+        return {
+            "status": "success",
+            "pickup_details": pickup_response
+        }
+
+    except requests.exceptions.RequestException as e:
+        frappe.log_error(frappe.get_traceback(), "Pickup API Network Error")
+        frappe.throw(str(e))
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Pickup Scheduling Error")
+        frappe.throw(str(e))
+
+
+@frappe.whitelist(allow_guest=True)
+def proxy_tracking():
+    """
+    Track shipment using Karrio Proxy Tracking API
+    """
+
+    try:
+        # ------------------------------------
+        # 1️⃣ Auth
+        # ------------------------------------
+        access_token = _get_valid_token()
+
+        url = f"{KARRIO_BASE_URL}/v1/proxy/tracking"
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "x-test-mode": "true"
+        }
+
+        # ------------------------------------
+        # 2️⃣ Read request payload
+        # ------------------------------------
+        req = frappe.request.get_json() or {}
+
+        tracking_number = req.get("tracking_number")
+        carrier_name = req.get("carrier_name")
+
+        if not tracking_number:
+            frappe.throw("Tracking number is required")
+
+        if not carrier_name:
+            frappe.throw("Carrier name is required")
+
+        # ------------------------------------
+        # 3️⃣ Build tracking payload (STRICT)
+        # ------------------------------------
+        payload = {
+            "tracking_number": tracking_number,
+            "carrier_name": carrier_name,
+            "account_number": req.get("account_number"),
+            "reference": req.get("reference"),
+            "info": req.get("info", {}),
+            "metadata": req.get("metadata", {})
+        }
+
+        # ------------------------------------
+        # 4️⃣ Call Karrio API
+        # ------------------------------------
+        response = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=15
+        )
+
+        if response.status_code not in (200, 201):
+            frappe.throw(
+                f"Tracking API Error {response.status_code}: {response.text}"
+            )
+
+        return {
+            "status": "success",
+            "tracking": response.json()
+        }
+
+    except requests.exceptions.RequestException as e:
+        frappe.log_error(frappe.get_traceback(), "Karrio Tracking Network Error")
+        frappe.throw(str(e))
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Karrio Tracking Error")
+        frappe.throw(str(e))
+        
+@frappe.whitelist(allow_guest=True)
+def track_shipment_by_booking(tracking_number: str):
+    """
+    Track shipment using Shipment Booking record
+    """
+
+    if not tracking_number:
+        frappe.throw("Tracking number is required")
+
+    # -------------------------------------------------
+    # 1️⃣ Get Shipment Booking
+    # -------------------------------------------------
+    booking = frappe.db.get_value(
+        "Shipment Booking",
+        {"tracking_number": tracking_number},
+        ["carrier_id", "carrier_name", "tracking_number","shipping_service_name"],
+        as_dict=True
+    )
+
+    if not booking:
+        frappe.throw("No shipment found for this tracking number")
+        
+    if booking.shipping_service_name == "Karrio":
+        carrier_id = booking.carrier_id or booking.carrier_name
+        carrier_name = booking.carrier_name
+
+        if not carrier_id:
+            frappe.throw("Carrier not found for this shipment")
+
+        # -------------------------------------------------
+        # 2️⃣ Auth
+        # -------------------------------------------------
+        access_token = _get_valid_token()
+
+        url = f"{KARRIO_BASE_URL}/v1/proxy/tracking"
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "x-test-mode": "true"
+        }
+
+        # -------------------------------------------------
+        # 3️⃣ Build payload
+        # -------------------------------------------------
+        payload = {
+            "tracking_number": tracking_number,
+            "carrier_name": carrier_name.lower(),
+            "reference": f"ShipmentBooking:{tracking_number}",
+            "info": {},
+            "metadata": {
+                "source": "Shipment Booking"
+            }
+        }
+        print(payload)
+
+        # -------------------------------------------------
+        # 4️⃣ Call Karrio
+        # -------------------------------------------------
+        response = requests.post(
+            url,
+            json=payload,
+            headers=headers,
+            timeout=15
+        )
+    elif booking.shipping_service_name == "Skynet Express":
+        ## here write code for skynet express tracking api
+        url = "https://api.postshipping.com/api2/tracks"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Token": "WS_PSTest"
+        }
+        
+        params = {
+            "ReferenceNumber": reference_number
+        }
+
+        response = requests.get(url, headers=headers, params=params, timeout=15)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(
+                f"Tracking API failed {response.status_code}: {response.text}"
+            )
+    
+    elif booking.shipping_service_name == "Norsk" or shipment_booked_with == "Norsk":
+        from click2ship_core.api.norsk_api import track_norsk_shipment
+        return track_norsk_shipment(tracking_number)
+    print("------------------")
+    print(response.status_code)
+    print(response.text)
+    if response.status_code not in (200, 201):
+        frappe.throw(
+            f"Tracking API Error {response.status_code}: {response.text}"
+        )
+
+    return {
+        "status": "success",
+        "shipment": booking,
+        "tracking": response.json()
+    }
+

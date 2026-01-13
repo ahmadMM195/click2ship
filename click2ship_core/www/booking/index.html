@@ -6,6 +6,7 @@
 
 <script>
     var savedquote = null;
+    var karioData = null;
 document.addEventListener("DOMContentLoaded", function() {
     // fetch("/api/method/click2ship_core.api.call.session_data")
     //     .then(res => res.json())
@@ -26,13 +27,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
             if(result.message){
                 const data = result.message;
-                if(Object.keys(data).length === 0){
+                /*if(Object.keys(data).length === 0){
                     container.innerHTML = "<p>No booking data in cache.</p>";
                 } else {
                     container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
-                }
+                }*/
             }
+        // Force UI to Pakistan always
+const UI_COUNTRY = "PK";
+const UI_ZIP = "54000";
+const UI_CITY = "Sialkot";
 
+document.querySelector('[name="SenderCountryCode"]').value = UI_COUNTRY;
+document.querySelector('[name="SenderZipcode"]').value = UI_ZIP;
+document.querySelector('[name="SenderCity"]').value = UI_CITY;
+
+
+        karioData = result.message.data.karrio_response;
         const get_quote = result.message.data.quote;
         console.log(get_quote.Provider);
         savedquote = get_quote;
@@ -133,7 +144,33 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+    const shipperType = document.getElementById("shipperType");
+    const cnicField = document.getElementById("cnicField");
+    const ntnField = document.getElementById("ntnField");
+
+    if (!shipperType) {
+        console.warn("ShipperType dropdown not found");
+        return;
+    }
+
+    shipperType.addEventListener("change", function () {
+        const type = this.value;
+
+        // Hide both first
+        cnicField.classList.add("d-none");
+        ntnField.classList.add("d-none");
+
+        if (type === "Individual") {
+            cnicField.classList.remove("d-none");
+        } else if (["Corporate", "Merchant", "Reseller"].includes(type)) {
+            ntnField.classList.remove("d-none");
+        }
+    });
+});
+</script>
 
 
 
@@ -177,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             ('SenderAddress3','Address Line 3 (Optional)'),
                             ('SenderCity','City'),
                             ('SenderCountryCode','CountryCode')
-                        ] %}
+                        ] %}                  
                             <div class="form-group mb-4">
                                 <div class="form-floating">
                                     {% if field == 'SenderCountryCode' %}
@@ -232,6 +269,33 @@ document.addEventListener("DOMContentLoaded", function() {
                                 </div>
                             </div>
                         {% endfor %}
+                        
+                        <div class="form-group mb-4">
+    <div class="form-floating">
+        <select name="ShipperType" id="shipperType" class="form-select">
+            <option value=""></option>
+            <option value="Individual">Individual</option>
+            <option value="Corporate">Corporate</option>
+            <option value="Merchant">Merchant</option>
+            <option value="Reseller">Reseller</option>
+        </select>
+        <label>Shipper Type (Pakistan Compliance)</label>
+    </div>
+</div>
+
+<div class="form-group mb-4 d-none" id="cnicField">
+    <div class="form-floating">
+        <input type="text" name="CNIC" class="form-control">
+        <label>CNIC</label>
+    </div>
+</div>
+
+<div class="form-group mb-4 d-none" id="ntnField">
+    <div class="form-floating">
+        <input type="text" name="NTN" class="form-control">
+        <label>NTN</label>
+    </div>
+</div>
 
                     </form>
                 </div>
@@ -480,8 +544,13 @@ document.addEventListener("DOMContentLoaded", function() {
                             • I confirm I've read and agree to the specific terms of Parcelforce which can be found in the following 2 links. <a href="#" target="_blank">Compensation Exclusions</a> and <a href="#" target="_blank">Prohibitions and Restrictions Guide</a>.
                         </label>
                         <div class="text-center mt-4">
-                            <button id="generatePayloadBtn" class="nav-btn -outlined">Add to Basket</button>
-                        </div>
+    <button
+        id="generatePayloadBtn"
+        type="button"
+        class="nav-btn -outlined">
+        Add to Basket
+    </button>
+</div>
                     </div>
                 </div>
             </div>
@@ -643,10 +712,38 @@ function getFormData(formSelector, prefixToRemove) {
     return data;
 }
 
+
+
 document.getElementById("generatePayloadBtn").addEventListener("click", (event) => {
     event.preventDefault();
+    
+    let total = 0;
+
+    document.querySelectorAll('#item-lines .item-line').forEach(row => {
+        const qty = parseFloat(row.querySelector('[name="Quantity[]"]')?.value) || 0;
+        const value = parseFloat(row.querySelector('[name="ItemValue[]"]')?.value) || 0;
+        total += qty * value;
+    });
+
+    const packageValueInput = document.querySelector('[name="PackageValue"]');
+    if (packageValueInput) {
+        packageValueInput.value = total.toFixed(2);
+    }
+    
+    const grandTotal = total;
+
+    if (grandTotal <= 0) {
+        alert("Value of contents must be greater than 0.");
+        return;
+    }
+    
     const csrfToken = "{{ csrf_token }}";
-    const serverDateGMT = "{{ server_date_gmt }}";
+    // const serverDateGMT = "{{ server_date_gmt }}";
+        // Browser local time 
+    const now = new Date();
+
+    // Convert to ISO string (YYYY-MM-DDTHH:mm:ss)
+    const serverDateGMT = now.toISOString().slice(0,19);
 
     // Utility to get all form data from a container
     function getAllFormData(containerSelector, prefixToRemove = "") {
@@ -702,7 +799,42 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
     }
 
     // Validation: basic required fields
-    const missingShipper = Object.entries(shipperData).filter(([k,v]) => !v && !k.includes("Address2") && !k.includes("Address3")).map(([k])=>k);
+    // const missingShipper = Object.entries(shipperData).filter(([k,v]) => !v && !k.includes("Address2") && !k.includes("Address3")).map(([k])=>k);
+
+    
+let missingShipper = [];
+
+// Standard required fields
+// Object.entries(shipperData).forEach(([key, value]) => {
+
+//     if (key.includes("Address2") || key.includes("Address3")) return;
+//     if (key === "CNIC" || key === "NTN") return;
+
+//     if (!value) {
+//         missingShipper.push(key);
+//     }
+// });
+
+// Compliance fields
+const shipperType_ = document.querySelector('[name="ShipperType"]')?.value || "";
+const cnic_ = document.querySelector('[name="CNIC"]')?.value || "";
+const ntn_  = document.querySelector('[name="NTN"]')?.value || "";
+
+
+if (!shipperType_) {
+    missingShipper.push("ShipperType");
+}
+
+if (shipperType_ === "Individual" && !cnic_) {
+    missingShipper.push("CNIC");
+}
+
+if (["Corporate", "Merchant", "Reseller"].includes(shipperType_) && !ntn_) {
+    missingShipper.push("NTN");
+}
+
+    
+    
     const missingDelivery = Object.entries(deliveryData).filter(([k,v]) => !v && !k.includes("Address2") && !k.includes("Address3")).map(([k])=>k);
     if (missingShipper.length || missingDelivery.length) {
         alert("Please fill in all required fields:\n" +
@@ -875,6 +1007,10 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
         }];
 } else if (provider === 'Karrio') {
 
+    const route_type_ = selected_quote.quote.quote_input.route_type;
+    
+    
+    
     // ---------- helpers ----------
     const safeString = (val, fallback = "N/A") =>
         val && String(val).trim() !== "" ? val : fallback;
@@ -885,7 +1021,7 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
         selected_quote.quote.ServiceCode;
 
     // ---------- address mapper ----------
-    const createAddress = (data) => ({
+    const createAddress = (data,state_code) => ({
         postal_code: safeString(data.Zipcode),
         city: safeString(data.City),
         federal_tax_id: safeString("N/A"),
@@ -895,7 +1031,9 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
         country_code: safeString(data.CountryCode),
         email: safeString(data.Email),
         phone_number: safeString(data.PhoneNumber),
-        state_code: safeString(data.State || "N/A"),
+        state_code: (typeof state_code === "string" && state_code.trim() !== "" && state_code !== "string")
+        ? state_code
+        : "",
         residential: false,
         street_number: safeString("N/A"),
         address_line1: safeString(data.Address1),
@@ -982,16 +1120,36 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
     }));
 
     // ---------- FINAL PAYLOAD ----------
+    let options_return = {}
+    if (route_type_ == 'International'){
+       options_return = {}
+    }
+    else{
+        options_return = {
+	    insurance: 100.0,
+	    currency: "USD"
+	    }
+    }
+    
+    const ORIGIN_ADDRESS =
+    route_type_ === "International"
+        ? { country: "PK", postal: "54000", city: "Sialkot" }
+        : { country: "GB", postal: "SW1A1AA", city: "London" };
     payload = {
-        recipient: createAddress(deliveryData),
-        shipper: createAddress(shipperData),
-        return_address: createAddress(shipperData),
-        billing_address: createAddress(shipperData),
+        recipient: createAddress(deliveryData,karioData?.recipient?.state_code),
+        shipper: {
+	    ...createAddress(shipperData, karioData?.shipper?.state_code),
+	    country_code: ORIGIN_ADDRESS.country,
+	    postal_code: ORIGIN_ADDRESS.postal,
+	    city: ORIGIN_ADDRESS.city
+	},
+        return_address: createAddress(shipperData,karioData?.shipper?.state_code),
+        billing_address: createAddress(shipperData,karioData?.shipper?.state_code),
 
         parcels: [parcel],
-
-        options: {},
-
+        
+        options: options_return,
+        
         payment: {
             paid_by: "sender",
             currency: "USD",
@@ -1006,7 +1164,7 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
                 declared_value: parseFloat(document.getElementById('grand-total').textContent) || 0,
                 account_number: null
             },
-            duty_billing_address: createAddress(shipperData),
+            duty_billing_address: createAddress(shipperData,karioData?.shipper?.state_code),
             content_type: "merchandise",
             content_description: "Merchandise",
             incoterm: "CFR",
@@ -1027,9 +1185,9 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
             {
                 id: rateId,
                 object_type: "rate",
-                carrier_name: selected_quote.quote.ServiceName,
-                carrier_id: "Karrio",
-                currency: selected_quote.quote.Currency || "USD",
+                carrier_name: selected_quote.quote.CarrierName,
+                carrier_id: selected_quote.quote.CarrierID,
+                currency: "USD",//selected_quote.quote.Currency || "GBP",
                 service: selected_quote.quote.ServiceCode,
                 total_charge: selected_quote.quote.AdjustedTotalCost,
                 transit_days: selected_quote.quote.TransitTime,
@@ -1044,8 +1202,8 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
         ]
     };
     
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    console.log(payload)
+    console.log("@@@@@@@@@@@@@@@111111122222223333333444444444@@@@@@@@@@@@@@")
+    console.log(shipperData)
     } else {
         // Default case or error handling
         // For now, let's assume the existing payload as default if provider is not matched.
@@ -1079,6 +1237,10 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
             }
         };
     }
+    
+    const shipperType = document.querySelector('[name="ShipperType"]').value;
+    const cnic = document.querySelector('[name="CNIC"]')?.value || null;
+    const ntn  = document.querySelector('[name="NTN"]')?.value || null;
 
     fetch("/api/method/click2ship_core.api.call.session_save", {
         method: "POST",
@@ -1086,7 +1248,15 @@ document.getElementById("generatePayloadBtn").addEventListener("click", (event) 
             "Content-Type": "application/json",
             "X-Frappe-CSRF-Token": csrfToken
         },
-        body: JSON.stringify({ booking: JSON.stringify(payload) }),
+        //body: JSON.stringify({ booking: JSON.stringify(payload) }),
+        body: JSON.stringify({
+		booking: JSON.stringify(payload),
+		compliance: JSON.stringify({
+			shipper_type: shipperType,
+			cnic: shipperType === "Individual" ? cnic : null,
+			ntn: shipperType !== "Individual" ? ntn : null
+		})
+	}),
         credentials: "include"
     })
     .then(res => res.json())

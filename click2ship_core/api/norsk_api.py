@@ -232,12 +232,16 @@ def store_shipment_details(doc, session_data):
 def book_norsk_shipment():
     try:
         shipment_data = frappe.request.get_data()
+
+        print(f"\n\n{shipment_data}\n\n")
     
         if not shipment_data:
             frappe.throw("Shipment data is missing or invalid.")
 
         settings = get_norsk_settings()
         resource = "/api/shipment"
+
+        print("Shipment Data Received:", shipment_data)
 
         headers = get_auth_headers(shipment_data, resource)
 
@@ -256,6 +260,9 @@ def book_norsk_shipment():
 
         # API JSON Response
         resp_json = response.json()
+        print(resp_json.keys())
+        for key,value in resp_json.items():
+            print(key,value)
         
         # Get session data
         session_key = frappe.session.sid
@@ -263,7 +270,7 @@ def book_norsk_shipment():
 
         # Extract fields
         barcode = resp_json.get("Barcode", {})
-        label_base64 = resp_json.get("Label", {})
+        label_base64 = resp_json.pop("Label", {})
 
         # Store into ERPNext Doctype
         doc = frappe.new_doc("Shipment Booking")
@@ -271,6 +278,7 @@ def book_norsk_shipment():
         doc.shipment_barcode = resp_json.get("Barcode", {})
         doc.shipment_booked_with = "Norsk"
         doc.booking_type = "Via UK"
+        doc.response = json.dumps(resp_json)
         doc.user = frappe.session.user
         doc.insert(ignore_permissions=True)
         
@@ -284,6 +292,7 @@ def book_norsk_shipment():
             "content": base64.b64decode(label_base64)  # decode PDF
         })
         file_doc.insert(ignore_permissions=True)
+        frappe.db.set_value("Shipment Booking",doc.label,file_doc.url)
 
         return {
             "success": True,
@@ -329,3 +338,71 @@ def get_selected_quote():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Fetch Selected Quote Failed")
         return {"status": "error", "message": str(e)}
+
+
+
+# -------------------------------------------------------------
+# Track shipment by barcode (Norsk API)
+# -------------------------------------------------------------
+@frappe.whitelist(allow_guest=True)
+def track_norsk_shipment(barcode):
+    """
+    Track shipment status from Norsk using barcode
+    GET /api/shipment/{barcode}
+    """
+    try:
+        if not barcode:
+            frappe.throw("Barcode is required for tracking.")
+
+        settings = get_norsk_settings()
+
+        # Norsk tracking resource path
+        resource = f"/api/shipment/{barcode}"
+
+        # GET request → empty payload but MD5 still required
+        payload = b""
+        date = formatdate(timeval=None, localtime=False, usegmt=True)
+        content_type = "application/json"
+        body_md5 = hashlib.md5(payload).hexdigest()
+
+        string_to_sign = f"GET\n{body_md5}\n{content_type}\n{date}\n{resource}"
+
+        signature = base64.b64encode(
+            hmac.new(
+                key=settings['secret_access_key'].encode("utf-8"),
+                msg=string_to_sign.encode("utf-8"),
+                digestmod=hashlib.sha1
+            ).digest()
+        ).decode("utf-8")
+
+        headers = {
+            "Authorization": f"{settings['access_key']}:{signature}",
+            "Date": date,
+            "Accept": "application/json",
+            "Content-Type": content_type
+        }
+
+        url = f"{settings['api_url']}shipment/{barcode}"
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code >= 400:
+            try:
+                error_details = response.json()
+            except Exception:
+                error_details = response.text
+            frappe.throw(f"Tracking API Error {response.status_code}: {error_details}")
+
+        return {
+            "success": True,
+            "barcode": barcode,
+            "tracking_data": response.json()
+        }
+
+    except requests.exceptions.RequestException as req_err:
+        frappe.log_error(frappe.get_traceback(), "Norsk Tracking API Request Error")
+        frappe.throw(f"Network error while contacting Norsk Tracking API: {str(req_err)}")
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Unexpected Error in Norsk Tracking")
+        frappe.throw(f"Unexpected error during shipment tracking: {str(e)}")

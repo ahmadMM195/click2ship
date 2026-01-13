@@ -9,13 +9,13 @@ def get_context(context):
     session_key = frappe.session.sid
 
     # Retrieve selected quote from cache
-    selected_quote = frappe.cache().get_value(f"selected_quote:{session_key}")
+    selected_quote = frappe.cache().get_value(f"session_data:{session_key}")
     booking_details = frappe.cache().get_value(f"booking_details:{session_key}")
 
     # Convert to dict if it's a JSON string
     if isinstance(selected_quote, str):
         try:
-            selected_quote = json.loads(selected_quote)
+            selected_quote = json.loads(selected_quote) 
         except json.JSONDecodeError:
             pass  # Keep as string if not JSON
 
@@ -34,6 +34,7 @@ def get_context(context):
     context.selected_quote = selected_quote
     context.booking_details = booking_details
     context.server_date_gmt = gmt_iso
+
 
     return context
 

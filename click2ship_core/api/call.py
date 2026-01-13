@@ -83,6 +83,8 @@ def rates():
                 skynet_response = future_skynet.result()
                 karrio_response = future_karrio.result()
 
+            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+            print(norsk_response)
             norsk_quotes = normalize_quotes(norsk_response, "Norsk", route_type, quote_input)
             skynet_quotes = normalize_quotes(skynet_response, "Skynet", route_type, quote_input)
             karrio_quotes = normalize_quotes(karrio_response, "Karrio", route_type, quote_input)
@@ -289,6 +291,8 @@ def normalize_quotes(raw_data, provider, via = "uk", quote_input=None):
                 "payload": rate.get("payload", {}),
                 "ServiceName": rate.get("meta", {}).get("service_name") or rate.get("service"),
                 "ServiceCode": rate.get("service"),
+                "CarrierID": rate.get("carrier_id"),
+                "CarrierName": rate.get("carrier_name"),
                 "TransitTime": rate.get("transit_days", None),
                 "PrettyTransitTime": f"{rate.get('transit_days', 'N/A')} days" if rate.get("transit_days") else "N/A",
                 "ChargeableWeight": 1.0,  # Karrio response doesn’t include weight per rate
@@ -300,6 +304,9 @@ def normalize_quotes(raw_data, provider, via = "uk", quote_input=None):
                 "Costs": rate.get("extra_charges", []),
             }
             quotes.append(apply_extra_costs(normalized))
+    
+    print("*************")
+    print(quotes)
 
     return quotes
 
@@ -366,6 +373,16 @@ def session_save():
             if isinstance(karrio_response, str):
                 karrio_response = json.loads(karrio_response)
             session_data["karrio_response"] = karrio_response
+        
+        shipment_details = frappe.form_dict.get("shipment_details")
+        print("@@@@@@@@@@@@@@@@@")
+        print(shipment_details)
+        print("@@@@@@@@@@@@@@@@@")
+
+        if shipment_details:
+            if isinstance(shipment_details, str):
+                shipment_details = json.loads(shipment_details)
+            session_data["shipment_details"] = shipment_details
 
         # ---------------------------
         # VALIDATION
@@ -373,6 +390,8 @@ def session_save():
         if not session_data:
             frappe.throw("No session data received.")
 
+
+        print(session_data)
         # ---------------------------
         # SAVE TO CACHE (1 hour)
         # ---------------------------

@@ -1,46 +1,202 @@
 {% extends "click2ship_core/templates/layout.html" %}
 
 {% block content %}
-<section id="banner" >
-        <div class="overlay"></div>
-        <div class="container  ">
-            <div class="row d-flex justify-content-between align-items-center">
-                <div class="col-md-6">
-                    <h1 class="fs-1 fw-bolder">
-                 PARCEL TRACKING
-                  
-                </h1>  <p class="mb-2 fs-3 text-muted">Need a hand with your shipping?
-                    Just reach out, we are here to help.</p>
-                
+
+<!-- ================= BANNER ================= -->
+<section id="banner">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row d-flex justify-content-between align-items-center">
+            <div class="col-md-6">
+                <h1 class="fs-1 fw-bolder">PARCEL TRACKING</h1>
+                <p class="mb-2 fs-3 text-muted">
+                    Need a hand with your shipping? Just reach out, we are here to help.
+                </p>
             </div>
+
             <div class="col-md-4 ms-auto">
                 <div class="card">
                     <div class="card-body">
-                        <form action="#">
-                            <p class="text-muted">Enter your parcel tracking number in the box below and click 'Track my parcel':</p>
-                            <div class="form-group mb-2">
-                                <label for="" class="form-label">Tracking Number</label>
-                                <input type="text" class="form-control" placeholder="ex: 1ZQEQWE11222">
-                            </div>
-                            <div class="form-group">
-                            <button class="nav-btn -outlined">Track Now</button>
+                        <p class="text-muted">
+                            Enter your parcel tracking number below and click
+                            <strong>Track Now</strong>
+                        </p>
 
-                            </div>
-                        </form>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Tracking Number</label>
+                            <input
+                                type="text"
+                                id="trackingNumber"
+                                class="form-control"
+                                placeholder="ex: 1Z1202R66698804005">
+                        </div>
+
+                        <button
+                            type="button"
+                            class="nav-btn -outlined w-100"
+                            id="track-now">
+                            Track Now
+                        </button>
                     </div>
-                 </div>
-            </div>   
+                </div>
             </div>
         </div>
-<div class="divider"></div>
-    </section>
+    </div>
+    <div class="divider"></div>
+</section>
+
+<!-- ================= RESULT ================= -->
 <section class="py-5 border-top">
-    <div class="container">
+    <div class="container" id="tracking-result">
         <div class="row">
             <div class="col-md-12">
-                <h1>Result</h1>
+                <h2>Tracking Result</h2>
+                <p class="text-muted">
+                    Enter a tracking number above to see shipment progress.
+                </p>
             </div>
         </div>
     </div>
 </section>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btn = document.getElementById("track-now");
+    const resultSection = document.getElementById("tracking-result");
+
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        const trackingNumber = document
+            .getElementById("trackingNumber")
+            .value.trim();
+
+        if (!trackingNumber) {
+            alert("Please enter a tracking number");
+            return;
+        }
+
+        resultSection.innerHTML = `
+            <div class="text-center py-4">
+                <p>Tracking shipment…</p>
+            </div>
+        `;
+
+        fetch(
+            "/api/method/click2ship_core.api.karrio_api.track_shipment_by_booking",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tracking_number: trackingNumber })
+            }
+        )
+        .then(res => res.json())
+        .then(r => {
+
+            if (!r.message || r.message.status !== "success") {
+                resultSection.innerHTML = `
+                    <p class="text-danger">
+                        Tracking failed. Please check the tracking number.
+                    </p>
+                `;
+                return;
+            }
+
+            const t = r.message.tracking.tracking;
+
+            /* ================= SUMMARY ================= */
+            let html = `
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="mb-3">Shipment Summary</h4>
+
+                        <p><strong>Carrier:</strong> ${t.carrier_name.toUpperCase()}</p>
+                        <p><strong>Tracking Number:</strong> ${t.tracking_number}</p>
+
+                        <p>
+                            <strong>Status:</strong>
+                            <span class="badge bg-warning text-dark">
+                                ${t.status.replace("_", " ")}
+                            </span>
+                        </p>
+
+                        <p><strong>Service:</strong>
+                            ${t.info.shipment_service || "N/A"}
+                        </p>
+
+                        <p><strong>Weight:</strong>
+                            ${t.info.package_weight || "N/A"}
+                            ${t.info.package_weight_unit || ""}
+                        </p>
+
+                        ${
+                            t.info.carrier_tracking_link
+                            ? `
+                                <a href="${t.info.carrier_tracking_link}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-outline-primary mt-2">
+                                    View on Carrier Website
+                                </a>
+                              `
+                            : ""
+                        }
+                    </div>
+                </div>
+            `;
+
+            /* ================= TIMELINE ================= */
+            html += `
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="mb-3">Tracking History</h4>
+                        <ul class="list-group">
+            `;
+
+            if (t.events && t.events.length) {
+                t.events.forEach(ev => {
+                    html += `
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <strong>${ev.date} ${ev.time || ""}</strong>
+                            </div>
+                            <div>${ev.description}</div>
+                            ${
+                                ev.location
+                                ? `<small class="text-muted">📍 ${ev.location}</small>`
+                                : ""
+                            }
+                        </li>
+                    `;
+                });
+            } else {
+                html += `
+                    <li class="list-group-item text-muted">
+                        No tracking events available.
+                    </li>
+                `;
+            }
+
+            html += `
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            resultSection.innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+            resultSection.innerHTML = `
+                <p class="text-danger">
+                    Error fetching tracking details. Please try again.
+                </p>
+            `;
+        });
+    });
+});
+</script>
+
 {% endblock %}
+

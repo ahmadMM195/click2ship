@@ -4,32 +4,12 @@
 
 <div id="cached-bookings"></div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    fetch("/api/method/click2ship_core.api.call.session_data")
-        .then(res => res.json())
-        .then(result => {
-            const container = document.getElementById("cached-bookings");
-
-            if(result.message){
-                const data = result.message;
-                if(Object.keys(data).length === 0){
-                    container.innerHTML = "<p>No booking data in cache.</p>";
-                } else {
-                    container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
-                }
-            }
-        })
-        .catch(err => console.error("Error fetching cached booking:", err));
-});
-</script>
-
 <section id="cover">
     <div class="container">
         <div class="quote-header">
-            <h2>Shipment Booked Successfully 🎉</h2>
+            <h2>Shipment Booked Successfully</h2>
             <p class="text-muted mt-2">
-                Your shipment has been created. You can print the documents below.
+                Your shipment has been created. You can print the documents or schedule pickup below.
             </p>
         </div>
     </div>
@@ -41,18 +21,26 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div class="quote-wrapper">
                     <div class="quote-item flex-column text-center p-4">
 
-                        <h4 class="mb-4">Shipment Documents</h4>
+                        <h4 class="mb-4">Shipment Actions</h4>
 
+                        <!-- Print Label -->
                         <button id="printLabelBtn"
                                 class="nav-btn -outlined mb-3 w-100"
                                 disabled>
                             🖨️ Print Shipping Label
                         </button>
 
+                        <!-- Print Invoice -->
                         <button id="printInvoiceBtn"
                                 class="nav-btn -outlined mb-3 w-100"
                                 disabled>
                             📄 Print Invoice
+                        </button>
+
+                        <!-- Schedule Pickup -->
+                        <button id="schedulePickupBtn"
+                                class="nav-btn -outlined mb-3 w-100">
+                            🚚 Schedule Pickup
                         </button>
 
                         <hr class="my-4">
@@ -73,74 +61,110 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+
     const labelBtn   = document.getElementById("printLabelBtn");
     const invoiceBtn = document.getElementById("printInvoiceBtn");
+    const pickupBtn  = document.getElementById("schedulePickupBtn");
     const statusMsg  = document.getElementById("statusMsg");
 
-    // 1️⃣ Get session data (from /cart)
+    /* ----------------------------------
+       Load shipment documents
+    ---------------------------------- */
     fetch("/api/method/click2ship_core.api.call.session_data", {
         credentials: "include"
     })
     .then(res => res.json())
     .then(r => {
-        if (!r.message || !r.message.data || !r.message.data.shipment_id) {
-            statusMsg.innerText = "Shipment session not found.";
+        const container = document.getElementById("cached-bookings");
+            console.log("container")
+            
+            if(r.message){
+                const data = r.message;
+                console.log(data)
+                if(Object.keys(data).length === 0){
+                    container.innerHTML = "<p>No booking data in cache.</p>";
+                } else {
+                    container.innerHTML = "<pre>" + JSON.stringify(data, null, 4) + "</pre>";
+                }
+            }
+
+        const shipment =
+            r.message.shipment_details ||
+            r.message.data?.shipment_details ||
+            r.message.data;
+
+        if (!shipment) {
+            statusMsg.innerText = "Shipment data missing.";
             return;
         }
 
-        const shipmentId = r.message.data.shipment_id;
+        const labelUrl   = shipment?.doc_url?.label;
+        const invoiceUrl = shipment?.doc_url?.invoice;
 
-        // 2️⃣ Fetch Shipment Booking record
-        return fetch("/api/method/frappe.client.get", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Frappe-CSRF-Token": "{{ csrf_token }}"
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                doctype: "Shipment Booking",
-                name: shipmentId
-            })
-        });
-    })
-    .then(res => res.json())
-    .then(r => {
-        if (!r || !r.message) return;
-
-        const booking = r.message;
-
-        // Label
-        if (booking.label) {
+        if (labelUrl) {
             labelBtn.disabled = false;
-            labelBtn.onclick = () => {
+            labelBtn.onclick = function () {
                 window.open(
-                    `/api/method/frappe.utils.file_manager.download_file?file_url=${booking.label}`,
+                    `/api/method/frappe.utils.file_manager.download_file?file_url=${labelUrl}`,
                     "_blank"
                 );
             };
         }
 
-        // Invoice
-        if (booking.invoice) {
+        if (invoiceUrl) {
             invoiceBtn.disabled = false;
-            invoiceBtn.onclick = () => {
+            invoiceBtn.onclick = function () {
                 window.open(
-                    `/api/method/frappe.utils.file_manager.download_file?file_url=${booking.invoice}`,
+                    `/api/method/frappe.utils.file_manager.download_file?file_url=${invoiceUrl}`,
                     "_blank"
                 );
             };
         }
 
-        if (!booking.label && !booking.invoice) {
+        if (!labelUrl && !invoiceUrl) {
             statusMsg.innerText = "Documents are still processing. Please refresh.";
         }
     })
     .catch(err => {
-        console.error(err);
+        console.error("Failed to load shipment documents:", err);
         statusMsg.innerText = "Failed to load shipment documents.";
     });
+
+    /* ----------------------------------
+       Schedule Pickup (Karrio)
+    ---------------------------------- */
+    pickupBtn.addEventListener("click", function () {
+        pickupBtn.disabled = true;
+        pickupBtn.innerText = "Scheduling Pickup...";
+        statusMsg.innerText = "";
+        
+        console.log("**************** schedule_proxy_pickup ************************")
+        fetch("/api/method/click2ship_core.api.karrio_api.schedule_proxy_pickup", {
+            credentials: "include"
+        })
+        .then(res => res.json())
+        .then(r => {
+            if (r.message) {
+                statusMsg.innerHTML =
+                    "<strong style='color:green'>Pickup scheduled successfully.</strong>";
+                console.log("Pickup Response:", r.message);
+            } else {
+                throw new Error("Pickup failed");
+            }
+        })
+        .catch(err => {
+            console.error("Pickup error:", err);
+            statusMsg.innerHTML =
+                "<span style='color:red'>Failed to schedule pickup.</span>";
+        })
+        .finally(() => {
+            pickupBtn.disabled = false;
+            pickupBtn.innerText = "Schedule Pickup";
+        });
+    });
+
 });
 </script>
+
 {% endblock %}
 

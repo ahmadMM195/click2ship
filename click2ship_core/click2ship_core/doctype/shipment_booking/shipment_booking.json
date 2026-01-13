@@ -10,7 +10,13 @@
   "section_break_cvzg",
   "shipment_barcode",
   "booking_type",
+  "customer",
   "user",
+  "carrier_id",
+  "carrier_name",
+  "tracking_number",
+  "shipper_type",
+  "cnic_ntn",
   "column_break_gmwf",
   "status",
   "shipment_booked_with",
@@ -340,11 +346,42 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nDraft\nDelivered\nCancelled"
+  },
+  {
+   "fieldname": "carrier_id",
+   "fieldtype": "Data",
+   "label": "Carrier ID"
+  },
+  {
+   "fieldname": "carrier_name",
+   "fieldtype": "Data",
+   "label": "Carrier Name"
+  },
+  {
+   "fieldname": "tracking_number",
+   "fieldtype": "Data",
+   "label": "Tracking Number"
+  },
+  {
+   "fieldname": "shipper_type",
+   "fieldtype": "Data",
+   "label": "Shipper Type"
+  },
+  {
+   "fieldname": "cnic_ntn",
+   "fieldtype": "Data",
+   "label": "CNIC/NTN"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-27 13:51:58.994918",
+ "modified": "2026-01-07 01:23:49.600023",
  "modified_by": "Administrator",
  "module": "Click2Ship Core",
  "name": "Shipment Booking",

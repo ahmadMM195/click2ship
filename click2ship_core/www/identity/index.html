@@ -128,8 +128,8 @@ fetch("/api/method/click2ship_core.api.call.session_data", {
                 if(Object.keys(data).length === 0){
                     container.innerHTML = "<p>No booking data in cache.</p>";
                 } else {
-                    var recipientName = data?.data?.booking?.shipper?.person_name || "";
-                    console.log(recipientName);
+                    var recipientName = data?.data?.booking?.shipper?.person_name || data?.data?.booking?.Shipper?.ContactName ||"";
+                    console.log("^^",recipientName);
                     
                     $("#rec-name").html(recipientName)
                     // container.innerHTML = recipientName;

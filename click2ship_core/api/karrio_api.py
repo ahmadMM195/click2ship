@@ -402,12 +402,25 @@ def rates():
         }
 
     # Token expired → reset & retry
-    if response.status_code == 401:
+    if response.status_code in (401,):
         settings = _get_settings()
         settings.access_token = None
         settings.save(ignore_permissions=True)
         frappe.db.commit()
         return rates()
+    if response.status_code in (401,424):
+        try:
+            res = response.json()
+            print("reeeeeeeeeessssssssssssssssssssssssss")
+            message = ""
+            for m in res.get("messages",[]):
+                message += m.get("message","")
+             return {
+                    "success": False,
+                    "message" : message if message != "" else "Carrier service unavailable"}
+            
+        except Exception as e:
+            frappe.throw(str(e))
 
     # Karrio returns structured error JSON → return parsed error
     try:

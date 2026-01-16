@@ -27,6 +27,8 @@ def rates():
 
             # City enrichment (shared)
             city_name = quote_input.get("destinationcity", "")
+            old_postal_code = quote_input.get("destinationZipcode", "")
+
             if city_name:
                 city_doc = frappe.get_doc("City", city_name)
                 quote_input.update({
@@ -34,6 +36,8 @@ def rates():
                     "state_code": city_doc.state_code,
                     "destinationTown": city_name
                 })
+            if route_type == "International":
+                quote_input["destinationZipcode"] = old_postal_code
 
             # ---------------------------------
             # ONLY KARRIO FOR INTERNATIONAL
